@@ -34,3 +34,19 @@ FAIL: initial offline Maven attempt could not resolve uncached compiler plugin; 
 NOT EXECUTED: feature E2E, TypeScript build, production deployment. Features are not implemented yet.
 Open Blockers: none for Phase 2. Bootstrap does not imply functional identity, authorization APIs or production readiness.
 Commit SHA: see commit introducing this section; Phase 0 commit is 5c06ed2.
+
+## Phase 2 — Contracts and boundaries
+
+Implemented: all requested named contract interfaces, instance-producing Micro App ABI, strict compatibility validator, TypeScript package exports, architecture checks and CI workflow.
+Reused: resource type vocabulary and public/private separation requirements.
+Refactored: none of the source UI-coupled contracts copied.
+Rewritten: headless contracts and version validation.
+Dropped: shared React ComponentType from platform contracts.
+Deferred: corresponding runtime implementations to their required phases.
+Tests Added: 3 architecture tests, 8 compatibility cases and 1 public-package import test.
+Tests Executed: npm run typecheck; npm test (includes build).
+PASS: TypeScript typecheck and build; 14 Node tests total.
+FAIL: none.
+NOT EXECUTED: hosted GitHub Actions, MFE lifecycle behavior and browser E2E (runtime not implemented).
+Open Blockers: none for identity implementation. Contract declarations are not server functionality.
+Commit SHA: see commit introducing this section; Phase 1 commit is de59b43dcd974e7c458d01e940ea901ce2034df1.
