@@ -23,6 +23,16 @@ export async function startUpstream({port,legacyCredential={username:'svc-accoun
    if(!state.legacy.valid.has(token))return send(401,{error:'legacy token rejected'});
    return send(200,{legacy:true,path:url.pathname});
   }
+  // Campus fixture API (example vocabulary) used by the React + Tailwind consumer.
+  if(url.pathname.startsWith('/campus/')){
+   const rest=url.pathname.slice('/campus'.length);const signedIn=Boolean(req.headers.authorization);
+   if(rest==='/news')return send(200,{news:[{id:'n1',title:'Semester opens',summary:'Registration is open for all courses.'},{id:'n2',title:'Library hours',summary:'The library is open late this week.'}]});
+   if(rest==='/courses')return send(200,{courses:[{id:'c-101',title:'Introduction to Systems',summary:'Foundations.'},{id:'c-202',title:'Distributed Platforms',summary:'Advanced.'}]});
+   const course=/^\/courses\/([a-z0-9-]+)(\/enrollments)?$/.exec(rest);
+   if(course&&!course[2])return send(200,{id:course[1],title:course[1]==='c-101'?'Introduction to Systems':'Distributed Platforms',summary:'Course details.',personalized:signedIn});
+   if(course&&course[2]&&req.method==='POST')return send(201,{enrolled:true,course:course[1],user:req.headers['x-hive-user-id']??null});
+   if(rest==='/students')return send(200,{students:[{id:'S-1',name:'Ada Example'},{id:'S-2',name:'Lin Example'}]});
+  }
   if(url.pathname.endsWith('/payments')){const record=url.searchParams.get('record')??'none';return send(200,{payments:[{id:'P-'+record+'-1',amount:120},{id:'P-'+record+'-2',amount:80}]});}
   if(url.pathname.endsWith('/big'))return send(200,{blob:'x'.repeat(2*1024*1024)});
   if(url.pathname.endsWith('/slow')){await new Promise(r=>setTimeout(r,3000));return send(200,{slow:true});}

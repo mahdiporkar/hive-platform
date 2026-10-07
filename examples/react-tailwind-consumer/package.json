@@ -1,0 +1,20 @@
+{
+  "name": "@hive-examples/react-tailwind-consumer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Proof consumer: a React + Tailwind micro-app (no Ant Design) and a server-rendered public site on Hive APIs.",
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {"build": "node build.mjs", "public-web": "node public-web/server.mjs"},
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/http-client": "*",
+    "@hive-platform/react": "*",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.1.14",
+    "tailwindcss": "4.1.14"
+  }
+}

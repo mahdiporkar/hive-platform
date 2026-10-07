@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "contractVersion": "1.1.0",
+  "runtimeVersion": "1.0.0",
+  "applicationKey": "campus-example",
+  "moduleKey": "student-example",
+  "displayName": "Student example (React + Tailwind)",
+  "resourceManifestVersion": "1.0.0",
+  "artifact": {"url": "/modules/student-example/entry.js", "integrity": "computed-at-build", "format": "ES_MODULE"},
+  "styleIsolation": "SHADOW_DOM",
+  "routes": [
+    {"key": "campus", "path": "/campus", "access": "PUBLIC", "navigation": {"label": "Campus", "order": 1}},
+    {"key": "courses", "path": "/courses", "access": "HYBRID", "navigation": {"label": "Courses", "order": 2}},
+    {"key": "course", "path": "/courses/:courseId", "access": "HYBRID"},
+    {"key": "students", "path": "/students", "access": "AUTHENTICATED", "resource": "student-example.list", "action": "view", "navigation": {"label": "Students", "order": 5}}
+  ]
+}

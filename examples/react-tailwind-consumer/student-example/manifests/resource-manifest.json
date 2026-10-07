@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "applicationKey": "campus-example",
+  "moduleKey": "student-example",
+  "resources": [
+    {"key": "student-example", "type": "MODULE", "parentKey": "campus-example", "name": "Student example", "actions": ["view"]},
+    {"key": "student-example.list", "type": "PAGE", "parentKey": "student-example", "name": "Student list", "actions": ["view", {"key": "annotate", "description": "Add notes to a record"}]},
+    {"key": "student-example.courses", "type": "PAGE", "parentKey": "student-example", "name": "Courses", "actions": ["view", {"key": "enroll", "description": "Enroll in a course"}]},
+    {"key": "student-example.api", "type": "API_RESOURCE", "parentKey": "student-example", "name": "Student API", "actions": ["read", "enroll"]}
+  ]
+}

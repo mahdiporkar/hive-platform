@@ -11,4 +11,5 @@
 - Headless SDK packages (core, http-client, auth, authorization, mfe-runtime), runtime contexts, feature flags and the framework-neutral example.
 - Workspace runtime: headless engine, layouts, event hub, persistence and plain-DOM renderer.
 - Operator Console (React + Ant Design) as a pure admin API client; API-only administration acceptance test.
+- React adapter, default shell, React + Tailwind proof consumer with SSR public site; public, hybrid and authenticated routes end to end.
 - No production release or completion of the full platform specification is claimed.

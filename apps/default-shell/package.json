@@ -1,0 +1,22 @@
+{
+  "name": "@hive-platform/default-shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Optional reference shell (React). Replaceable: it uses only public Hive SDK packages and APIs.",
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {"build": "vite build"},
+  "dependencies": {
+    "@hive-platform/auth": "*",
+    "@hive-platform/authorization": "*",
+    "@hive-platform/contracts": "*",
+    "@hive-platform/core": "*",
+    "@hive-platform/http-client": "*",
+    "@hive-platform/mfe-runtime": "*",
+    "@hive-platform/react": "*",
+    "@hive-platform/workspace": "*",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {"@vitejs/plugin-react": "5.0.4", "vite": "7.1.9"}
+}

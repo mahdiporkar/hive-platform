@@ -1,0 +1,4 @@
+/* Tailwind for one micro-app. The artifact renders inside a shadow root (styleIsolation SHADOW_DOM), so Preflight and
+   utilities apply only to this micro-app; nothing leaks into the host or sibling micro-apps. */
+@import "tailwindcss";
+@source "./";

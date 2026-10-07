@@ -1,0 +1,3 @@
+/* Tailwind for the server-rendered public site (a separate deployable consumer, not a micro-app). */
+@import "tailwindcss";
+@source "./";

@@ -1,0 +1,30 @@
+{
+  "name": "@hive-platform/react",
+  "version": "0.1.0",
+  "description": "Optional React adapter for Hive: createReactMicroApp, context hooks, workspace and extension components. Hive itself never requires React.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/core": "*",
+    "@hive-platform/authorization": "*",
+    "@hive-platform/workspace": "*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2 <20",
+    "react-dom": ">=18.2 <20"
+  }
+}

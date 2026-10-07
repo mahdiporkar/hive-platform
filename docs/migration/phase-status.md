@@ -163,6 +163,22 @@ NOT EXECUTED: accessibility audit of the console.
 Open Blockers: none.
 Commit SHA: see git log (Phase 8 commit is c4ec33b).
 
+## Phase 10 — Public / hybrid / authenticated runtime (COMPLETE)
+
+Implemented: `@hive-platform/react` (createReactMicroApp, HiveProvider, usePermission, useWorkspace, WorkspaceView, ExtensionSlot); `apps/default-shell` (navigation filtered by access, all layouts, slot chrome for loading/error/denied/sign-in, URL mirrors the active route only, restore, login/logout with context re-evaluation, HEADER/NAVIGATION/DASHBOARD extension slots loaded from an optional consumer `/shell-extensions.js`); `examples/react-tailwind-consumer` (student-example micro-app with PUBLIC, HYBRID and AUTHENTICATED routes, permission-gated actions, dynamic routes, events; Tailwind in a shadow root; server-rendered public site); campus fixture API; gateway single-file mounts; consumer architecture tests.
+Reused: none.
+Refactored: route access semantics surfaced end to end (UI hint vs server enforcement).
+Rewritten: shell (reference shell replaced by a replaceable SDK client).
+Dropped: shell-coupled navigation and admin privileges.
+Deferred: none for this phase.
+Tests Added: `tests/e2e/public-hybrid.test.mjs`, `tests/architecture/consumers.test.mjs` (4).
+Tests Executed: typecheck (packages, examples, console, shell); npm test; build:shell; build:examples; test:e2e:public-hybrid.
+PASS: 45 Node tests; Phase 10 browser E2E (E2E 2, 4, 5, 6, shell restore, SSR).
+FAIL (fixed): TypeScript crashed on a multi-candidate path mapping (explicit react mapping); test misunderstood SINGLE-layout replacement (test navigates back).
+NOT EXECUTED: Next.js specifically (SSR proven with react-dom/server; pattern identical).
+Open Blockers: none.
+Commit SHA: see git log (Phase 9 commit is ed6e464).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

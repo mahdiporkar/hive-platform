@@ -21,6 +21,7 @@ export async function startGateway({port,bff,mounts,spa={},headers={}}) {
   if(PROXIED.some(p=>url.pathname.startsWith(p)))return proxy(req,res);
   for(const [prefix,root] of roots){
    if(!url.pathname.startsWith(prefix))continue;
+   if(url.pathname===prefix){try{if((await stat(root)).isFile())return send(res,root);}catch{}}
    let relative;
    try{relative=decodeURIComponent(url.pathname.slice(prefix.length));}catch{res.writeHead(400);return res.end();}
    const file=normalize(join(root,relative));
