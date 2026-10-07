@@ -18,7 +18,8 @@ Commit SHA: see the commit introducing this report.
 
 ## Overall release status
 
-Full platform acceptance is NOT EXECUTED. Read the phase-specific sections below; no release or production readiness is asserted.
+Milestone 0.1.0-dev.0: phases 0–15 COMPLETE, 28/28 verification steps PASS. Release 1.0.0 is NOT EXECUTED — see the final verification matrix at the end.
+
 ## Phase 1 — Clean bootstrap
 
 Implemented: independent Java reactor, BFF and Authorization health endpoints, deny-all API boundary, empty Flyway V1, PostgreSQL-backed OpenFGA verification topology, repository guard.
@@ -245,28 +246,62 @@ Commit SHA: see git log (Phase 13 commit is ed533bf).
 
 E2E coverage map (spec E2E 1–14): fresh install zero data → test:bootstrap; first administrator → test:authorization, golden; module registration and manifests → test:manifests, test:e2e:console, golden; grants and decisions → test:authorization, golden; forward-token route → test:routing, golden; legacy route → test:routing; public/hybrid/authenticated → test:e2e:public-hybrid; multi-MFE and isolation → test:e2e:mfe; workspace layout, events and restore → test:e2e:workspace, golden; operator console → test:e2e:console; API-only administration → test:e2e:api-admin; Superset tunnel → test:superset (stub upstream); logout and session revocation → test:identity, golden; CLI lifecycle → test:cli, test:cli:up.
 
-## Requested release verification matrix
+## Phase 15 — Release candidate (COMPLETE for milestone 0.1.0-dev.0)
+
+Implemented: final verification matrix and acceptance checklist below; version remains `0.1.0-dev.0` (1.0.0 is reserved for final acceptance, which includes items NOT EXECUTED here).
+Reused / Refactored / Rewritten / Dropped: none in this phase.
+Deferred: see "Deferred work" below.
+Tests Executed: `npm run verify:all` — 28/28 PASS (results in `.local/verification.json`).
+NOT EXECUTED: listed in the matrix with the exact limitation.
+Open Blockers: none for the milestone; the NOT EXECUTED rows block 1.0.0.
+Commit SHA: see git log (Phase 14 commit is cb90070).
+
+## Final verification matrix
 
 | Check | Result | Evidence / exact limitation |
 |---|---|---|
-| npm clean install | PASS | npm ci executed |
-| npm build | PASS | Executed by npm test; contracts package only |
-| npm typecheck | PASS | Strict TypeScript compiler |
-| npm tests | PASS | 14 implemented Node tests, not future platform tests |
-| Maven verify | PASS | 20 Java tests, no failures/errors/skips |
-| Architecture / forbidden dependency / domain checks | PASS | Current implemented platform source only |
-| Contract tests | PASS | Version rejection, deprecation, package export |
-| Docker Compose config | PASS | Executed by bootstrap scenario |
-| Fresh DB / Flyway baseline | PASS | V1 from empty isolated PostgreSQL; zero application/config/audit rows |
-| OpenFGA bootstrap | PASS | Model accepted; denied unknown resource; model survives restart |
-| BFF / authorization health | PASS | Real Java processes; dependency failure changes readiness |
-| Primary OIDC HTTP flow | PASS | Signed-JWT fixture plus real Redis; not browser E2E |
-| Branding scan | PASS | Read-only scan of implemented services/packages/tools/tests/infra/ADRs found no obsolete runtime names |
-| Golden Path E2E | NOT EXECUTED | Registration, grants, manifests and runtime not implemented |
-| Forward Token / Legacy E2E | NOT EXECUTED | Dynamic routing not implemented |
-| Public / Hybrid route E2E | NOT EXECUTED | Public context and route runtime not implemented |
-| Multi-MFE / Workspace restoration E2E | NOT EXECUTED | MFE/workspace engines not implemented |
-| Operator Console / API administration | NOT EXECUTED | Administrative APIs and UI not implemented |
-| Production images / TLS / operational hardening | NOT EXECUTED | Phase 13 not started |
-| Hosted CI | NOT EXECUTED | Workflow authored; no hosted result observed |
-| Release candidate | NOT EXECUTED | Mandatory phases remain open |
+| npm clean install | PASS | `npm ci` |
+| npm build / typecheck | PASS | all packages, strict TypeScript, 4 tsconfigs |
+| npm tests (architecture, contracts, packages, docs) | PASS | 50 tests, 0 failures |
+| Maven verify | PASS | 127 Java tests, 0 failures/errors/skips |
+| Architecture / forbidden dependency / domain / branding | PASS | `test:architecture` |
+| Contract and compatibility matrix | PASS | shared fixture executed by Java and TypeScript |
+| Fresh DB / Flyway V1–V7 / zero data | PASS | `test:bootstrap` |
+| OpenFGA model and bootstrap | PASS | `test:model`, `test:bootstrap` |
+| Identity: OIDC/PKCE, vault, refresh, logout | PASS | `test:identity` |
+| Keycloak interoperability | PASS | real Keycloak 26.3.3 (`test:keycloak`, golden path) |
+| Authorization, outbox, replay, cache | PASS | `test:authorization` |
+| Manifest governance | PASS | `test:manifests` |
+| Dynamic routing: forward token, legacy | PASS | `test:routing` |
+| Superset tunnel | PASS | `test:superset` against a stub of the stock Superset API |
+| Real Superset instance | NOT EXECUTED | no Superset deployed in verification |
+| Production hardening / log secrecy | PASS | `test:hardening`, `test:log-scan` |
+| MFE runtime / workspace / console / API admin / public-hybrid E2E | PASS | Playwright, Edge (Windows) |
+| Golden path E2E (31 steps) | PASS | `test:e2e:golden` |
+| Non-Chromium browsers (Firefox, WebKit) | NOT EXECUTED | only Chromium-family engines run |
+| CLI and CLI up/down with images | PASS | `test:cli`, `test:cli:up` |
+| Docker Compose config | PASS | `verify:compose` |
+| TLS termination | NOT EXECUTED | documented in deployment guide; not run locally |
+| Next.js consumer | NOT EXECUTED | SSR proven with React + Vite example, not Next.js |
+| Hosted CI | NOT EXECUTED | workflow authored; no hosted run observed |
+
+## Final acceptance checklist
+
+| Criterion | Status |
+|---|---|
+| Independent repository, no source history, source repository untouched | COMPLETE |
+| Fresh installation contains zero business data | COMPLETE |
+| Core free of React/AntD/MUI/Tailwind and business domain | COMPLETE |
+| No OAuth/refresh/legacy/service tokens reach browser JavaScript | COMPLETE (session scan, golden path, log scan) |
+| Identity, authorization, catalog, manifests, routing, MFE, workspace, public/hybrid | COMPLETE |
+| Operator console optional; API-only administration | COMPLETE |
+| SDK, CLI, extension points, consumer examples | COMPLETE |
+| Optional Superset integration | COMPLETE (API tunnel); UI embedding DEFERRED |
+| Production hardening | COMPLETE; rate limiting/WAF, mTLS DEFERRED |
+| Documentation and ADRs | COMPLETE |
+| Hosted CI, real Superset, TLS, non-Chromium browsers | NOT EXECUTED |
+| 1.0.0 release | NOT EXECUTED (blocked on the rows above) |
+
+## Deferred work
+
+RP-initiated IdP logout; OU/LDAP directory integration; runtime policies/obligations; application-scoped delegated administration; upstream rewrite patterns; proxy retries; API_KEY / OAUTH2_CLIENT_CREDENTIALS / MTLS route modes; NEW_WINDOW / POPOUT layouts; `hive add domain` and automatic `hive upgrade`; Superset UI embedding, guest tokens, per-user RLS; OpenAPI documents; rate limiting/WAF; multi-instance load testing.
