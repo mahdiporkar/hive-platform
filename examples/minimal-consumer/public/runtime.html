@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hive runtime host (plain DOM)</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 0; color: #1d2433; }
+    header { display: flex; gap: 16px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #d6dbe4; }
+    nav { display: flex; gap: 12px; flex: 1; } main { padding: 16px; } #status { color: #5b6475; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header><strong>Plain host</strong><nav id="nav"></nav><span id="user"></span></header>
+  <main><p id="status" data-hive-state="STARTING">Starting…</p><section id="slot"></section></main>
+  <script type="module" src="/host/runtime-host.js"></script>
+</body>
+</html>

@@ -1,9 +1,16 @@
 # Contracts
 
-`@hive-platform/contracts` exports versioned data contracts and a real compatibility validator. `npm run build` generates JavaScript and declarations in the package's own `dist` directory. Consumers import only the public package export.
+`@hive-platform/contracts` (version 1.1.0) exports the versioned, framework-neutral data contracts shared by the platform, SDK packages, CLI and consumers, plus the executable compatibility validator ([compatibility](compatibility.md)). Server-produced shapes mirror the BFF and authorization service responses.
 
-Identity and session contain safe identity metadata, never credentials or token values. Public context is a separate allowlisted shape; interfaces alone do not sanitize server responses. Server-side projections and browser secrecy checks are required in later phases.
+| Area | Contracts |
+|---|---|
+| Errors | `PlatformError` (every API error body: `code`, `message`, `correlationId`), `RuntimeDiagnostic` |
+| Identity & context | `HiveIdentity` (token-free), `HiveSession`, `PublicHiveContext` (`authenticated:false`, public modules only), `HiveContext` (identity, session, permissions keyed `applicationKey:resourceKey`, platform roles), `FeatureFlag`, `RuntimeModule`, `RuntimeRoute` |
+| Catalog & authorization | `Resource`, `ResourceAction`, `ResourceType`, `AuthorizationDecision` (with deny reasons), `PermissionGrant` |
+| Manifests | `ResourceManifest` (authorization only), `MicroFrontendManifest` (artifact and routes only), `ManifestRevision` |
+| Lifecycle | `HiveMicroApp` (`{contractVersion, create()}`), `HiveMicroAppInstance` (`mount`, `update?`, `unmount`), `HiveMountContext`, `EventPort`, `HiveEventEnvelope` |
+| Workspace | `Workspace`, `WorkspaceSlot`, `WorkspaceLayout` (SINGLE, TABS, SPLIT, DASHBOARD), `WorkspaceState` (routes only), `WorkspaceEvent` |
+| Routing | `ServiceTarget`, `ProxyRoute`, `RouteOperation`, `LegacyAuthenticationConfiguration` (secret reference only) |
+| Extensions | `ExtensionRegistration`, `ExtensionPoint` |
 
-The MFE ABI creates an independent lifecycle instance per mount. Workspace persistence stores route descriptors rather than arbitrary app state. Service targets and secret references are control-plane-only contracts and cannot be included in public context.
-
-`npm run typecheck` validates types. `npm test` executes compatibility and dependency boundary tests. Runtime features represented by interfaces are not yet implemented.
+Rules enforced by tests: contracts import no UI framework (`tests/architecture`); public context types cannot carry identity or permissions (`authenticated:false` discriminant); credentials appear nowhere in contracts — only secret references.

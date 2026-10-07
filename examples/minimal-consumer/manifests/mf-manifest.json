@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "contractVersion": "1.1.0",
+  "runtimeVersion": "1.0.0",
+  "applicationKey": "campus-example",
+  "moduleKey": "finance-example",
+  "displayName": "Finance example (plain TypeScript)",
+  "resourceManifestVersion": "1.0.0",
+  "artifact": {"url": "/modules/finance-example/entry.js", "integrity": "computed-at-build", "format": "ES_MODULE"},
+  "styleIsolation": "SHADOW_DOM",
+  "routes": [
+    {"key": "about", "path": "/finance/about", "access": "PUBLIC", "navigation": {"label": "Finance info", "order": 20}},
+    {"key": "overview", "path": "/finance", "access": "AUTHENTICATED", "resource": "finance-example.payments", "action": "view", "navigation": {"label": "Payments", "order": 21}},
+    {"key": "record", "path": "/finance/records/:recordId", "access": "AUTHENTICATED", "resource": "finance-example.payments", "action": "view"}
+  ]
+}

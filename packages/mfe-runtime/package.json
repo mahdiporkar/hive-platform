@@ -1,0 +1,21 @@
+{
+  "name": "@hive-platform/mfe-runtime",
+  "version": "0.1.0",
+  "description": "Framework-neutral micro-frontend loader and lifecycle host with SRI verification and precise diagnostics.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/core": "*"
+  }
+}

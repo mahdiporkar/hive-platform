@@ -115,6 +115,22 @@ NOT EXECUTED: TLS to upstream targets; DNS-rebinding scenario.
 Open Blockers: none.
 Commit SHA: see git log (Phase 5 commit is 30a6782).
 
+## Phase 7 — MFE runtime (COMPLETE)
+
+Implemented: `@hive-platform/core` (signals, lifetimes, diagnostics, route matching, extension registry), `@hive-platform/http-client` (cookie session, CSRF with one refresh retry, correlation ids, timeouts, PlatformError), `@hive-platform/auth` (contexts, safe login return URLs, logout), `@hive-platform/authorization` (permission and route-access hints), `@hive-platform/mfe-runtime` (compatibility-first loading, SRI over executed bytes, precise diagnostics, shared artifact load with independent instances, SCOPED/SHADOW_DOM containers, lifecycle deadlines); runtime context projections (`/internal/runtime/public-context`, `/internal/runtime/context`) and BFF `/api/public/context`, `/api/me/context`; feature flags (environment restriction, tenant overrides, exposure classes, audited); `examples/minimal-consumer` plain-TypeScript micro-app and plain-DOM host; dev gateway; esbuild bundling with build-time SRI; example type-checking.
+Reused: none (the reference loader was unsuitable).
+Refactored: context/manifest projections into server-side runtime contexts.
+Rewritten: MFE loader and lifecycle (ADR-004).
+Dropped: module-scoped remote caching, React types in shared contracts, vague "container not registered" errors.
+Deferred: none for this phase.
+Tests Added: `tests/packages/mfe-runtime.test.mjs` (6 tests, 11 failure classes), `tests/packages/headless.test.mjs` (5), `tests/e2e/mfe-runtime.test.mjs` (Edge).
+Tests Executed: typecheck (packages + examples); npm test; mvnw verify; test:e2e:mfe.
+PASS: 36 Node tests; 122 Java tests; Phase 7 browser E2E.
+FAIL (fixed): extension ordering expectation in test; E2E logged in the fixture IdP's default subject instead of the granted user (test); authenticated contexts dropped public-only modules (product bug, fixed); unknown anonymous paths now mean "sign in" because public contexts never disclose protected routes (host behavior, ADR-004); example type-check found an undeclared field (fixed).
+NOT EXECUTED: non-Chromium browsers (Firefox/WebKit not installed).
+Open Blockers: none.
+Commit SHA: see git log (Phase 6 commit is 81cca46).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

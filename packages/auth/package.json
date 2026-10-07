@@ -1,0 +1,21 @@
+{
+  "name": "@hive-platform/auth",
+  "version": "0.1.0",
+  "description": "Login, logout, session and context access for Hive consumers (no tokens in the browser).",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/http-client": "*"
+  }
+}

@@ -7,12 +7,15 @@
         "node": ">=22"
     },
     "workspaces": [
-        "packages/*"
+        "packages/*",
+        "examples/*",
+        "apps/*",
+        "cli"
     ],
     "scripts": {
         "build": "node tools/build.mjs",
-        "typecheck": "tsc -p tsconfig.json --noEmit",
-        "test": "npm run build && node --test tests/architecture/*.test.mjs tests/contracts/*.test.mjs",
+        "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json",
+        "test": "npm run build && node --test tests/architecture/*.test.mjs tests/contracts/*.test.mjs tests/packages/*.test.mjs",
         "test:architecture": "node --test tests/architecture/*.test.mjs",
         "test:contracts": "npm run build && node --test tests/contracts/*.test.mjs",
         "verify:repository": "node tools/verify-repository.mjs",
@@ -22,9 +25,12 @@
         "test:authorization": "node --test tests/integration/authorization.test.mjs",
         "test:model": "node --test tests/integration/openfga-model.test.mjs",
         "test:manifests": "node --test tests/integration/manifests.test.mjs",
-        "test:routing": "node --test tests/integration/routing.test.mjs"
+        "test:routing": "node --test tests/integration/routing.test.mjs",
+        "build:examples": "node examples/minimal-consumer/build.mjs",
+        "test:e2e:mfe": "node --test tests/e2e/mfe-runtime.test.mjs"
     },
     "devDependencies": {
+        "esbuild": "0.25.10",
         "playwright": "1.63.0",
         "typescript": "5.9.2"
     }

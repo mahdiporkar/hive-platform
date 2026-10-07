@@ -25,8 +25,10 @@ class ModuleController {
   private final ModuleRegistry registry;
   private final ManifestDocuments documents;
   private final RuntimeCatalog runtime;
+  private final RuntimeContexts contexts;
 
-  ModuleController(ModuleRegistry registry, ManifestDocuments documents, RuntimeCatalog runtime) {
+  ModuleController(ModuleRegistry registry, ManifestDocuments documents, RuntimeCatalog runtime, RuntimeContexts contexts) {
+    this.contexts = contexts;
     this.registry = registry;
     this.documents = documents;
     this.runtime = runtime;
@@ -101,4 +103,6 @@ class ModuleController {
   RuntimeCatalog.Snapshot adminSnapshot() { return runtime.snapshot(); }
 
   @GetMapping("/internal/runtime/catalog") RuntimeCatalog.Snapshot snapshot() { return runtime.snapshot(); }
+  @GetMapping("/internal/runtime/public-context") RuntimeContexts.PublicContext publicContext() { return contexts.publicContext(); }
+  @GetMapping("/internal/runtime/context") RuntimeContexts.UserContext context(@RequestParam java.util.UUID userId) { return contexts.userContext(userId); }
 }

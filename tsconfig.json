@@ -1,9 +1,29 @@
 {
  "compilerOptions": {
-  "target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,
-  "declaration":true,"outDir":"dist","rootDir":"packages","lib":["ES2022","DOM"],
-  "exactOptionalPropertyTypes":true,"noUncheckedIndexedAccess":true,"noImplicitOverride":true,
-  "forceConsistentCasingInFileNames":true,"skipLibCheck":false
+  "target": "ES2022",
+  "module": "NodeNext",
+  "moduleResolution": "NodeNext",
+  "strict": true,
+  "declaration": true,
+  "outDir": "dist",
+  "rootDir": "packages",
+  "lib": [
+   "ES2022",
+   "DOM"
+  ],
+  "exactOptionalPropertyTypes": true,
+  "noUncheckedIndexedAccess": true,
+  "noImplicitOverride": true,
+  "forceConsistentCasingInFileNames": true,
+  "skipLibCheck": false,
+  "paths": {
+   "@hive-platform/*": [
+    "./packages/*/src/index.ts"
+   ]
+  },
+  "baseUrl": "."
  },
- "include":["packages/*/src/**/*.ts"]
+ "include": [
+  "packages/*/src/**/*.ts"
+ ]
 }

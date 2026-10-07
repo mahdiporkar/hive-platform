@@ -1,0 +1,22 @@
+{
+  "name": "@hive-platform/workspace",
+  "version": "0.1.0",
+  "description": "Headless multi-slot workspace engine: layouts, slot lifecycle, event bus and safe persistence.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/core": "*",
+    "@hive-platform/mfe-runtime": "*"
+  }
+}

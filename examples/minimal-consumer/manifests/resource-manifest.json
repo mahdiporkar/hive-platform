@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "applicationKey": "campus-example",
+  "moduleKey": "finance-example",
+  "resources": [
+    {"key": "finance-example", "type": "MODULE", "parentKey": "campus-example", "name": "Finance example", "actions": ["view"]},
+    {"key": "finance-example.payments", "type": "PAGE", "parentKey": "finance-example", "name": "Payments", "actions": ["view", {"key": "pay", "description": "Record a payment"}]},
+    {"key": "finance-example.api", "type": "API_RESOURCE", "parentKey": "finance-example", "name": "Finance API", "actions": ["read", "write"]}
+  ]
+}

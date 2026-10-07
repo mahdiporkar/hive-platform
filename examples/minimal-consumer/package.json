@@ -1,0 +1,17 @@
+{
+  "name": "@hive-examples/minimal-consumer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Framework-neutral proof: a plain TypeScript/DOM micro-app and a plain host page on the Hive SDK.",
+  "type": "module",
+  "scripts": {"build": "node build.mjs"},
+  "dependencies": {
+    "@hive-platform/auth": "*",
+    "@hive-platform/authorization": "*",
+    "@hive-platform/contracts": "*",
+    "@hive-platform/core": "*",
+    "@hive-platform/http-client": "*",
+    "@hive-platform/mfe-runtime": "*",
+    "@hive-platform/workspace": "*"
+  }
+}
