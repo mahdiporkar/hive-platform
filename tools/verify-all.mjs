@@ -2,6 +2,7 @@
 // Every check is reported PASS or FAIL with its duration; checks not run are reported NOT EXECUTED with a reason.
 import {spawnSync} from 'node:child_process';
 import {mkdirSync,writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
 
 const npm=process.platform==='win32'?'npm.cmd':'npm';
 const steps=[
@@ -9,7 +10,7 @@ const steps=[
  ['npm build',[npm,'run','build']],
  ['typecheck',[npm,'run','typecheck']],
  ['npm tests (architecture, contracts, packages)',[npm,'test']],
- ['Maven verify',[process.platform==='win32'?'mvnw.cmd':'./mvnw','-B','verify']],
+ ['Maven verify',[process.platform==='win32'?resolve('mvnw.cmd'):'./mvnw','-B','verify']],
  ['build examples',[npm,'run','build:examples']],
  ['build default shell',[npm,'run','build:shell']],
  ['build operator console',[npm,'run','build:console']],

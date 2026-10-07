@@ -227,6 +227,24 @@ NOT EXECUTED: TLS termination in front of the gateway (documented, not run local
 Open Blockers: none.
 Commit SHA: see git log (Phase 12 commit is 1520119).
 
+## Phase 14 — End-to-end acceptance and documentation (COMPLETE)
+
+Implemented: golden-path E2E (`tests/e2e/golden-path.test.mjs`, 31 steps against real Keycloak 26.3.3, PostgreSQL, OpenFGA, Redis, both services and the dev gateway); documentation set (architecture, principles, control/runtime plane, versioning, source capability map) with an executable documentation check; full 28-step verification runner (`npm run verify:all`).
+Reused: none.
+Refactored: test harness (`beforeBff` hook, development profile for test services).
+Rewritten: none.
+Dropped: none.
+Deferred: none added in this phase.
+Tests Added: golden path E2E (1 scenario, 31 steps); `tests/architecture/docs.test.mjs` (3).
+Tests Executed: complete `npm run verify:all` (28 steps).
+PASS: 28/28 runner steps; 50 Node tests; 127 Java tests (0 failures, 0 errors, 0 skipped).
+FAIL (fixed): (1) regression found by the golden path — the dev gateway and the nginx template set `X-Forwarded-Proto` without a port while the services honour native forwarded headers, so the OAuth `redirect_uri` lost its port; both gateways now pass forwarded headers through untouched. (2) The nginx gateway served the shell for `/actuator/*`; it now returns 404. (3) The runner could not launch `mvnw.cmd` on Windows (cmd does not search the working directory); it now uses an absolute path.
+NOT EXECUTED: hosted GitHub Actions run; non-Chromium browsers.
+Open Blockers: none.
+Commit SHA: see git log (Phase 13 commit is ed533bf).
+
+E2E coverage map (spec E2E 1–14): fresh install zero data → test:bootstrap; first administrator → test:authorization, golden; module registration and manifests → test:manifests, test:e2e:console, golden; grants and decisions → test:authorization, golden; forward-token route → test:routing, golden; legacy route → test:routing; public/hybrid/authenticated → test:e2e:public-hybrid; multi-MFE and isolation → test:e2e:mfe; workspace layout, events and restore → test:e2e:workspace, golden; operator console → test:e2e:console; API-only administration → test:e2e:api-admin; Superset tunnel → test:superset (stub upstream); logout and session revocation → test:identity, golden; CLI lifecycle → test:cli, test:cli:up.
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

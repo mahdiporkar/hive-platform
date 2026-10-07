@@ -1,9 +1,12 @@
-# ADR-002: Control and runtime planes
+# ADR-002: Control plane and runtime plane
 
-Status: accepted; bootstrap implementation only.
+Status: accepted; implemented across Phases 4–12. Details: [control plane vs runtime plane](../control-plane-runtime-plane.md).
 
-Authorization owns control-plane persistence and the authorization graph writer. BFF owns browser sessions and runtime transport. Consumers must communicate through APIs and cannot directly mutate persistence or graph relationships.
+## Decision
 
-The executable bootstrap test runs both Java services without consumers, using isolated PostgreSQL databases for control-plane and OpenFGA state. Model creation and default-deny behavior are tested, including model persistence across an OpenFGA restart. The graph's absence makes authorization readiness fail; liveness remains available.
+- **Control plane** (authorization service, `/admin/**`): applications, resource catalog, modules and manifests, identities and providers, roles, groups, grants, platform roles, service targets, routes, operations, legacy profiles, integrations, feature flags, audit and API log queries. PostgreSQL is the source of truth; the service is the only writer of the OpenFGA graph.
+- **Runtime plane** (BFF + `/internal/**` runtime APIs of the authorization service): sessions, contexts, authorization decisions, route resolution and execution, integration tunnels, MFE and workspace runtimes in the browser.
+- Runtime code never reads administrative tables directly. It consumes versioned runtime representations: `/internal/runtime/catalog` (with a monotonic revision), `/internal/runtime/public-context`, `/internal/runtime/context`, `/internal/routing/resolve`, `/internal/authorization/check`, `/internal/integrations/superset/resolve`, `/internal/runtime/features`.
+- Channels: browsers reach only the BFF; the BFF reaches the authorization service with a machine credential (`bff`, role RUNTIME); automation may use the optional `provisioner` credential for `/admin/**` and `/provisioning/**`. Consumers never touch databases or the graph.
 
-The Compose file is a local verification topology. Production network boundaries, credentials and deployment artifacts belong to Phase 13. All feature endpoints remain denied until their security phases implement them.
+Evidence: bootstrap (both services run without consumers; graph readiness), authorization/manifests/routing suites (control-plane APIs), E2E suites (runtime through the BFF only), API-only administration and console suites.

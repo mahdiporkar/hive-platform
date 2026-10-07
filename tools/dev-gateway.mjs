@@ -43,7 +43,8 @@ export async function startGateway({port,bff,mounts,spa={},headers={}}) {
  }
  function proxy(req,res){
   const forwarded=httpRequest({host:upstream.hostname,port:upstream.port,path:req.url,method:req.method,
-   headers:{...req.headers,'x-forwarded-proto':'http','x-forwarded-host':req.headers.host}},response=>{res.writeHead(response.statusCode,response.headers);response.pipe(res);});
+   // Host is preserved; forwarded headers are left to an outer TLS terminator (the BFF trusts them only from internal proxies).
+   headers:{...req.headers}},response=>{res.writeHead(response.statusCode,response.headers);response.pipe(res);});
   forwarded.on('error',()=>{if(!res.headersSent)res.writeHead(502,{'Content-Type':'application/json'});res.end('{"code":"GATEWAY_UPSTREAM_UNAVAILABLE"}');});
   req.pipe(forwarded);
  }

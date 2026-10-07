@@ -39,3 +39,8 @@ jobs:
       - run: npm run test:cli
       - run: npm run test:cli:up
       - run: npm run test:keycloak
+      - run: npm run test:hardening
+      - run: npm run test:e2e:golden
+      - run: npm run verify:compose
+      - run: npm run test:architecture
+      - run: npm run test:log-scan

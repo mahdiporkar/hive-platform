@@ -17,7 +17,7 @@ server {
   location ~ ^/(api|auth|oauth2|login/oauth2)/ {
     proxy_pass ${HIVE_BFF_UPSTREAM};
     proxy_set_header Host $http_host;
-    proxy_set_header X-Forwarded-Proto $scheme;
+    # X-Forwarded-Proto/Host/Port from an outer TLS terminator pass through unchanged; Host carries the public origin.
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_http_version 1.1;
     proxy_read_timeout 130s;

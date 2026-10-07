@@ -40,7 +40,8 @@
         "test:hardening": "node --test tests/integration/hardening.test.mjs",
         "test:log-scan": "node --test tests/security/log-scan.test.mjs",
         "verify:compose": "node tools/verify-compose.mjs",
-        "verify:all": "node tools/verify-all.mjs"
+        "verify:all": "node tools/verify-all.mjs",
+        "test:e2e:golden": "node --test tests/e2e/golden-path.test.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

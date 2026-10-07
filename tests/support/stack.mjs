@@ -21,7 +21,7 @@ export async function ready(url,{attempts=150,log}={}) {
  * Starts PostgreSQL, OpenFGA and Redis through Compose and optionally the authorization service and BFF.
  * Ports: base+0 Postgres, +1 OpenFGA, +2 Redis, +3 authorization, +4 BFF.
  */
-export async function startStack(t,{suite,base,authorization=true,bff=true,authorizationEnv={},bffEnv={}}) {
+export async function startStack(t,{suite,base,authorization=true,bff=true,authorizationEnv={},bffEnv={},beforeBff}) {
  const ports={db:base,fga:base+1,redis:base+2,authorization:base+3,bff:base+4};
  const credentials={db:secret(),graph:secret(),redis:secret(),internal:secret(),provisioning:secret(),vault:randomBytes(32).toString('base64')};
  const project=`hive-${suite}-${Date.now()}`;
@@ -60,6 +60,7 @@ export async function startStack(t,{suite,base,authorization=true,bff=true,autho
   HIVE_PROFILE:'development',HIVE_BFF_PORT:String(ports.bff),HIVE_AUTHORIZATION_URL:stack.urls.authorization,HIVE_INTERNAL_PASSWORD:credentials.internal,HIVE_CONTROL_ALLOW_HTTP:'true',
   HIVE_REDIS_HOST:'127.0.0.1',HIVE_REDIS_PORT:String(ports.redis),HIVE_REDIS_PASSWORD:credentials.redis,HIVE_VAULT_KEY:credentials.vault,...bffEnv};
  if(bff){
+  if(beforeBff)await beforeBff();
   stack.bffProcess=stack.java('bff',stack.bffEnv);
   await ready(stack.urls.bff+'/actuator/health/readiness',{log:`${logDir}/bff.log`});
  }

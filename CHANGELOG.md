@@ -15,4 +15,5 @@
 - hive CLI (validate, doctor, up/down, scaffolding, register), container images and full-stack compose, all extension points.
 - Optional Superset integration through an authorized API tunnel with asset grants.
 - Production hardening: fail-closed production profile, forwarded headers, log secrecy scan, branding scan, verification runner.
+- End-to-end acceptance: golden-path scenario against real Keycloak; documentation set with executable link/script checks; forwarded-header pass-through fix in both gateways.
 - No production release or completion of the full platform specification is claimed.

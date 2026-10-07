@@ -1,59 +1,58 @@
 # Source capability map
 
-Reference: `mahdiporkar/aurevia-super-app`, commit `4bdd8b89bb8c53193a4c486afe30c03eab35b5d9`. Source was inspected read-only. Locations below are relative to that repository. Classification records intended migration, not implemented or verified Hive functionality. No source test has been executed in this session.
+Migration reference document (historical source names are intentional here). Reference: `mahdiporkar/aurevia-super-app`, commit `4bdd8b89bb8c53193a4c486afe30c03eab35b5d9`, inspected read-only; nothing was written to it. Source tests were not executed; Hive behavior is proven by the Hive tests listed.
 
-BFF = `services/superapp-bff/src/main/java/com/aurevia/bff`; AUTH = `services/authorization-service/src/main/java/com/aurevia/authz`. Tests are under the corresponding `src/test/java` tree.
+BFF = `services/superapp-bff/src/main/java/com/aurevia/bff`; AUTH = `services/authorization-service/src/main/java/com/aurevia/authz`.
+
+Status: COMPLETE (implemented and tested in Hive), DEFERRED (valid, outside this milestone), DROPPED (not entering Hive).
 
 | Source Capability | Source Location | Classification | Hive Target | Reason | Status | Tests | Notes |
 |---|---|---|---|---|---|---|---|
-| Token envelope | BFF/security/TokenVaultCrypto.java | REUSE | services/bff/security | AES-256-GCM, random 96-bit IV, key rotation | NOT EXECUTED | TokenVaultCryptoTest | Preserve tamper rejection |
-| Token-free session principal | BFF/security/TokenFreeSecurityContextRepository.java | REFACTOR | services/bff/security | Removes credential-bearing OIDC authorities before persistence | NOT EXECUTED | TokenFreeSecurityContextRepositoryTest | Keep server-side vault separate |
-| Session logout | BFF/security/VaultLogoutHandler.java | REFACTOR | services/bff/security | Vault cleanup must accompany session invalidation | NOT EXECUTED | VaultLogoutHandlerTest | HIVE_SESSION cookie |
-| OIDC and refresh | BFF/security | REFACTOR | services/bff/identity | Generic OIDC with dynamic registration; remove product assumptions | NOT EXECUTED | OidcIssuerValidationTest, OidcLoginSuccessHandlerTest | Preserve issuer/audience validation |
-| Dynamic providers | AUTH/identityprovider | REFACTOR | services/authorization/identity | Control-plane configuration and secret references | NOT EXECUTED | IdentityProviderServiceTest | No browser credentials |
-| Canonical users and aliases | AUTH/identity | REFACTOR | services/authorization/identity | Provider-independent identity | NOT EXECUTED | CanonicalIdentityResolverTest | No business profile fields |
-| First administrator | AUTH/bootstrap | REFACTOR | services/authorization/bootstrap | Explicit bootstrap, no demo grants | NOT EXECUTED | FirstAdministratorBootstrapIntegrationTest | Must not invent default administrator |
-| Roles, groups, grants | AUTH/access | REFACTOR | services/authorization/access | Catalog-dependent grants | NOT EXECUTED | AccessAdministrationServiceTest | PostgreSQL source of truth |
-| OU and LDAP | AUTH/directory | REFACTOR | optional directory integration | Useful optional enterprise identity integration | NOT EXECUTED | DirectoryDnParserTest, OuRuleEvaluatorTest | Disabled without explicit configuration |
-| Authorization graph | AUTH/openfga; infra/openfga/model.fga | REFACTOR | services/authorization/openfga | Preserve relationship semantics; remove branded roots | NOT EXECUTED | OpenFgaRelationshipAdapterTest | Only authorization service writes graph |
-| Transactional outbox | AUTH/sync/OutboxReconciler.java | REUSE | services/authorization/sync | Claim ownership, retries and startup coordination | NOT EXECUTED | OutboxReconcilerTest | Do not replace with best-effort dual writes |
-| Authorization decision cache | AUTH/authorization; AUTH/openfga | REFACTOR | services/authorization | Fail closed; invalidate on writes | NOT EXECUTED | PermissionLifecycleIntegrationTest | Revocation consistency requires dedicated tests |
-| Resource catalog | AUTH/registry/ResourceManifestService.java | REFACTOR | services/authorization/catalog | Parent validity, cycles, action uniqueness | NOT EXECUTED | ResourceManifestServiceTest | Remove synthetic branded application keys |
-| Manifest draft/diff/publish | AUTH/registry | REFACTOR | services/authorization/manifests | Immutable version checksums and coordinated activation | NOT EXECUTED | ResourceManifestWorkflowTest, ManifestReleaseIntegrationTest | Resource and artifact revisions remain separate |
-| Artifact registry | AUTH/ui | REFACTOR | services/authorization/artifacts | Independent immutable artifact revisions | NOT EXECUTED | UiPluginRegistryServiceTest | Framework-neutral contract required |
-| MFE contracts | packages/contracts/src/index.ts | REWRITE | packages/contracts | Source imports React ComponentType in shared contract | NOT EXECUTED | New compatibility tests required | Existing mount ABI is marked legacy |
-| Dynamic loader | apps/shell/src/remote-loader.ts | REWRITE | packages/mfe-runtime | Loader owned by shell, module globals and vague errors | NOT EXECUTED | remote-loader.test.ts | Multiple factory-created instances |
-| Navigation and context | apps/shell; BFF/api/MeController.java | REFACTOR | packages/core; services/bff | Separate public and authenticated projections | NOT EXECUTED | MeControllerTest | UI navigation is not authorization |
-| Workspace | apps/shell/src/index.tsx | REWRITE | packages/workspace | Extract reusable model and instance lifecycle | NOT EXECUTED | New workspace tests required | SINGLE/TABS/SPLIT/DASHBOARD |
-| HTTP client | packages/http-client | REFACTOR | packages/http-client | Cookie/CSRF transport without tokens | NOT EXECUTED | Package tests | Injectable fetch |
-| UI authorization helpers | packages/authorization-sdk | REFACTOR | packages/authorization | Headless decisions with optional React adapter | NOT EXECUTED | Package tests | Server enforcement remains mandatory |
-| Shared UI library | packages/sh-core-ui | DROP | none | Presentation belongs to consumers | NOT EXECUTED | Architecture tests required | No wholesale migration |
-| Route resolution | AUTH/routing/RouteResolutionService.java | REFACTOR | services/authorization/routing | Longest prefix, priority, specificity, ambiguity rejection | NOT EXECUTED | RouteResolutionServiceTest | Explicit operation access modes |
-| Approved upstream policy | BFF/proxy/GatewayTargetPolicy.java | REFACTOR | services/bff/proxy | Exact approved origin and normalized paths | NOT EXECUTED | GatewayTargetPolicyTest | Avoid arbitrary browser URLs |
-| Forward token proxy | BFF/api/OperationalProxyController.java; BFF/outboundauth | REFACTOR | services/bff/proxy | Server-held user token | NOT EXECUTED | OperationalProxyForwardingTest | Real browser secrecy E2E required |
-| Legacy token acquisition | BFF/outboundauth | REFACTOR | services/bff/outboundauth | Secret references, bounded response, expiry, refresh coordination | NOT EXECUTED | LegacyTokenResponseParserTest, LegacyServiceTokenProviderTest | Preserve redacted diagnostic records |
-| Outbound connection registry | AUTH/outbound | REFACTOR | services/authorization/outbound | Validated modes and optimistic concurrency | NOT EXECUTED | Runtime integration tests required | Credentials remain server-side |
-| SSRF and artifact policy | services/ui-artifact-security | REFACTOR | services/ui-artifact-security | Tested network policy boundary | NOT EXECUTED | UiArtifactNetworkMatrixTest | Preserve production checks |
-| Superset | AUTH/superset; BFF/proxy/SupersetTargetPolicy.java | REFACTOR | optional integration | Useful but cannot be mandatory Core | NOT EXECUTED | SupersetSplitRoutingTest | Independent lifecycle |
-| Audit and API logs | AUTH/observability; BFF/observability | REFACTOR | services/authorization/audit | Structured events and recursive redaction | NOT EXECUTED | SafeErrorBodySerializerTest | No raw token payloads |
-| Administrative API security | AUTH/config/AdminAuthorizationInterceptor.java | REFACTOR | services/authorization/security | Server-side graph checks for privileged mutations | NOT EXECUTED | AdminAuthorizationInterceptorTest | Actor headers require trusted boundary |
-| Operator interface | apps/mfe-admin | REFACTOR | apps/operator-console | Standalone API client, optional deployment | NOT EXECUTED | API-only acceptance required | Remove shell privilege assumptions |
-| HR/Finance/Reports demos | apps/mfe-hr; apps/mfe-finance; apps/mfe-reports | DROP | none | Business/demo presentation excluded from Core | NOT EXECUTED | Domain leakage checks required | Generic fixtures will be authored independently |
-| Database migration chain | services/authorization-service/src/main/resources/db | REWRITE | V1__hive_platform_baseline.sql | Existing baseline includes admin artifacts and Superset roles | NOT EXECUTED | CoreBaselineInstallationIntegrationTest | Do not copy history or existing seeds |
-| Production topology | infra/docker-compose/compose.yml | REWRITE | infra/docker-compose | Existing Core mounts shell and carries development defaults | NOT EXECUTED | verify-core-compose-isolation.mjs | New zero-consumer acceptance |
-| OpenAPI | BFF/docs; AUTH/docs | REFACTOR | service API specifications | Retain security documentation and coverage tests | NOT EXECUTED | OpenApiDocumentationCoverageTest | Reflect implemented endpoints only |
-| Verification tooling | tools; tests/e2e | REFACTOR | tools; tests | Real bootstrap, routing and browser verification patterns | NOT EXECUTED | Existing scenario scripts | Never transplant credentials or demo fixtures |
-| Historical documents | docs | DROP | docs/migration references only | Describe implementation afresh | NOT EXECUTED | Documentation verification | Old reports are not current evidence |
-
-## Concrete source findings
-
-- Shared contracts explicitly import React. A renamed package would violate the new boundary.
-- Remote loads are cached at module scope; one global scope binds to one artifact. Instance lifecycle must be separated from artifact loading.
-- Manifest staging rejects a different checksum at an existing version; publish coordinates artifact and resource activation under a lock. Preserve that invariant.
-- Outbox network calls happen outside claim transactions; lost claim ownership is not swallowed as a retryable projection error.
-- Source Core baseline tests expect an ADMIN panel, six artifacts, Superset roles and reports-related resources. It cannot serve as Hive's zero-consumer baseline.
-- Source security configuration authenticates almost all requests and special-cases Superset CSRF. Hive needs independent route-operation access decisions and optional integration configuration.
-
-## Archaeology acceptance
-
-Repository identity, source commit, architectural coupling, source locations, migration classifications and executable source-test references have been recorded. This is a capability-level survey, not a claim that every source method has been audited. Each later phase must inspect and execute the relevant behavior before migration, as required by the specification.
+| Token envelope | BFF/security/TokenVaultCrypto.java | REUSE | services/bff/security/TokenVaultCrypto | AES-256-GCM, random IV, key rotation | COMPLETE | TokenVaultCryptoTest; test:identity | tamper rejection kept |
+| Token-free session principal | BFF/security/TokenFreeSecurityContextRepository.java | REFACTOR | services/bff/security (SessionIdentity, RequestAuthorizedClients) | no OIDC authorities persisted | COMPLETE | test:identity (Redis session scan) | servlet transport |
+| Session logout | BFF/security/VaultLogoutHandler.java | REFACTOR | IdentityConfiguration logout | vault cleanup with invalidation | COMPLETE | test:identity, golden path | HIVE_SESSION |
+| OIDC and refresh | BFF/security | REFACTOR | services/bff/security | PKCE, issuer validation, lease-coordinated refresh | COMPLETE | test:identity (5 token faults, 8-way refresh), test:keycloak | absolute deadline never extended |
+| Dynamic identity providers | AUTH/identityprovider | REFACTOR | authorization/identity | secret references, origin allow-list, revisions | COMPLETE | test:identity | admin + provisioning APIs |
+| Canonical users and aliases | AUTH/identity | REFACTOR | authorization/identity | provider-independent identity, explicit aliases | COMPLETE | test:identity (concurrent first login) | no e-mail auto-linking |
+| First administrator | AUTH/bootstrap | REUSE | authorization/access/FirstAdministrator | one-time, durable marker | COMPLETE | test:authorization, golden path | no invented admin |
+| Roles, groups, grants | AUTH/access | REFACTOR | authorization/access | PostgreSQL source of truth, history | COMPLETE | test:authorization | subject references |
+| OU and LDAP | AUTH/directory | REFACTOR | optional directory integration | optional enterprise integration | DEFERRED | — | not required by Core; no partial stub shipped |
+| Authorization graph | AUTH/openfga; infra/openfga/model.fga | REWRITE | infra/openfga/model.fga | per-action objects, platform type, no branded roots | COMPLETE | test:model, test:authorization | ADR-003 |
+| Transactional outbox | AUTH/sync/OutboxReconciler.java | REUSE | authorization/graph/GraphOutbox | claims, ordering, retries, lost-claim fault | COMPLETE | test:authorization | after-commit drain added |
+| Startup/graph reconciliation | AUTH/sync/OpenFgaStartupReconciler.java | REFACTOR | authorization/graph/GraphReplay + GraphStore.verify | replay on store loss (incl. soft delete) | COMPLETE | test:authorization (store deletion) | |
+| Decision cache | AUTH/openfga/OpenFgaRelationshipAdapter.java | REUSE | authorization/graph/DecisionCache | epoch invalidation, fail-closed bump | COMPLETE | test:authorization (cached allow revoked) | optional |
+| Runtime policies/obligations | AUTH/policy | REFACTOR | — | not required for relationship decisions | DEFERRED | — | ADR-003 |
+| Semantics registry (action aliases) | AUTH/semantics | DROP | — | replaced by declared per-action objects | DROPPED | — | |
+| Resource catalog | AUTH/registry/ResourceManifestService.java | REFACTOR | authorization/catalog/ResourceCatalog | parent rules, cycles, ownership, archive | COMPLETE | test:authorization, test:manifests | |
+| Manifest draft/diff/publish/activate | AUTH/registry | REFACTOR | authorization/manifest/ModuleRegistry | immutable versions, coordinated activation | COMPLETE | test:manifests, test:e2e:console | DB triggers added |
+| Manifest fetcher | AUTH/registry/HttpManifestFetcher.java | REUSE | authorization/manifest/ManifestFetcher | bounded, no redirects, classified errors | COMPLETE | test:manifests | |
+| Artifact registry | AUTH/ui | REFACTOR | artifact_revision + ModuleRegistry | immutable revisions, SRI required | COMPLETE | test:manifests | |
+| Artifact URI/network policy | services/ui-artifact-security | REUSE | services/ui-artifact-security | tested SSRF matrix | COMPLETE | UiArtifactNetworkMatrixTest (54), UiArtifactUriPolicyTest | namespace changed |
+| MFE contracts | packages/contracts/src/index.ts | REWRITE | packages/contracts | source imported React types | COMPLETE | tests/contracts, architecture | |
+| Dynamic loader | apps/shell/src/remote-loader.ts | REWRITE | packages/mfe-runtime | instances, SRI over executed bytes, diagnostics | COMPLETE | tests/packages/mfe-runtime, test:e2e:mfe | ADR-004 |
+| Navigation and context | apps/shell; BFF/api/MeController.java | REFACTOR | BFF ContextController + RuntimeContexts | separate public/authenticated projections | COMPLETE | test:e2e:public-hybrid | |
+| Navigation overlays (menu overrides) | AUTH/registry | REFACTOR | navigation_overlay | presentation only | COMPLETE | test:manifests | |
+| Panel discovery special case | AUTH/authorization/AuthorizationDecisionService.java | DROP | — | product-specific | DROPPED | — | |
+| Workspace | apps/shell/src/index.tsx | REWRITE | packages/workspace | headless engine | COMPLETE | tests/packages/workspace, test:e2e:workspace | ADR-005/006 |
+| HTTP client | packages/http-client | REFACTOR | packages/http-client | cookie/CSRF transport, no tokens | COMPLETE | tests/packages/headless | |
+| UI authorization helpers | packages/authorization-sdk | REFACTOR | packages/authorization | headless hints | COMPLETE | tests/packages/headless | |
+| Shared UI library | packages/sh-core-ui | DROP | — | presentation belongs to consumers | DROPPED | consumers.test.mjs | |
+| Route resolution | AUTH/routing/RouteResolutionService.java | REFACTOR | authorization/routing/RouteResolver | longest prefix, priority, specificity, ambiguity | COMPLETE | test:routing | runtime projection API |
+| Route path policy | AUTH/routing/RoutePathPolicy.java | REUSE | authorization/routing/RoutePathPolicy | canonical paths, pattern language | COMPLETE | RoutePathPolicyTest (migrated) | |
+| Upstream rewrite patterns | AUTH/routing/UpstreamPathPolicy.java | REFACTOR | strip prefix + base path | simpler transformation | DEFERRED (rewrite) | — | ADR-007 |
+| Approved upstream policy | BFF/proxy/GatewayTargetPolicy.java | REUSE | bff/proxy/TargetGuard | exact-origin allow-list | COMPLETE | test:routing | + DNS-resolved policy |
+| Forward token proxy | BFF/api/OperationalProxyController.java | REFACTOR | bff/proxy/RuntimeProxy | allowlisted headers, limits | COMPLETE | test:routing, golden path | |
+| Proxy retries | BFF/proxy/ProxyRetryPolicy.java | REFACTOR | — | never retry silently | DEFERRED | — | ADR-007 |
+| Legacy token acquisition | BFF/outboundauth | REFACTOR | bff/proxy/LegacyTokens | encrypted cache, single flight, breaker | COMPLETE | test:routing (LEGACY section) | revision-keyed cache |
+| Outbound connection registry | AUTH/outbound | REFACTOR | service_target + legacy_auth_profile | validated modes, revisions | COMPLETE | test:routing | |
+| Superset | AUTH/superset; BFF/api/OperationSupersetProxyController.java | REWRITE | integrations + bff/integrations/SupersetTunnel | stock Superset API, no custom build | COMPLETE | test:superset | ADR-011; UI embedding DEFERRED |
+| Audit and API logs | AUTH/observability; BFF/observability | REFACTOR | authorization/audit, routing/ApiLog, starter Redaction | structured, redacted | COMPLETE | test:authorization, test:routing, test:log-scan | |
+| Administrative API security | AUTH/config/AdminAuthorizationInterceptor.java | REWRITE | authorization/admin/AdminAuthorization | explicit per-handler platform roles | COMPLETE | SecurityConfigurationTest, test:authorization | URL heuristics dropped |
+| Production configuration guard | AUTH/openfga/ProductionOpenFgaConfigurationGuard.java | REFACTOR | starter ProductionGuard + StartupGuard | fail closed | COMPLETE | ProductionGuardTest, test:hardening | |
+| Operator interface | apps/mfe-admin | REWRITE | apps/operator-console | standalone API client | COMPLETE | test:e2e:console | |
+| HR/Finance/Reports demos | apps/mfe-hr; apps/mfe-finance; apps/mfe-reports | DROP | — | business demos | DROPPED | domain leakage, bootstrap zero-data | examples authored afresh |
+| Database migration chain | services/authorization-service/src/main/resources/db | REWRITE | V1–V7 | clean baseline without seeds | COMPLETE | test:bootstrap (all tables empty) | |
+| Production topology | infra/docker-compose/compose.yml | REWRITE | infra/docker-compose/hive.yml | zero-consumer core, optional UI profile | COMPLETE | test:cli:up, verify:compose | |
+| OpenAPI documents | BFF/docs; AUTH/docs | REFACTOR | — | endpoint docs in Markdown | DEFERRED | — | docs list every API |
+| Verification tooling | tools; tests/e2e | REFACTOR | tools, tests | real bootstrap/routing/browser checks | COMPLETE | verify:all | |
+| Historical documents | docs | DROP | — | old reports are not evidence | DROPPED | — | |
