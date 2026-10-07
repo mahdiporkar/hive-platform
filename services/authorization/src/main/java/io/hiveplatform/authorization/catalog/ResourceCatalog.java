@@ -87,6 +87,10 @@ public class ResourceCatalog {
     ResourceType type = ResourceType.parse(node.type());
     if (type == ResourceType.APPLICATION) throw HiveException.invalid("APPLICATION nodes are created with the application");
     Row parent = requireParent(rows, node.parentKey(), type);
+    if ("MANIFEST".equals(parent.origin()) && db.sql("select definition_mode from micro_app where module_key = ?").param(parent.ownerModule())
+        .query(String.class).optional().map("MANIFEST"::equals).orElse(false))
+      throw new HiveException(org.springframework.http.HttpStatus.CONFLICT, "DEFINITION_MODE", "Module " + parent.ownerModule()
+          + " is MANIFEST-defined; switch it to HYBRID to attach manual resources under its nodes");
     UUID id = UUID.randomUUID();
     db.sql("insert into resource(id, application_id, resource_key, resource_type, parent_id, display_name, origin) values (?, ?, ?, ?, ?, ?, 'MANUAL')")
         .params(id, app, node.key(), type.name(), parent.id(), node.displayName()).update();

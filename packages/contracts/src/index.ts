@@ -62,4 +62,4 @@ export interface ProxyRoute {id:string; moduleKey:string; prefix:string; service
 export interface RouteOperation {id:string; routeId:string; method:'GET'|'HEAD'|'POST'|'PUT'|'PATCH'|'DELETE'|'OPTIONS'; pattern:string; access:AccessMode; resource?:string; action?:string}
 export interface LegacyAuthenticationConfiguration {id:string; connectionId:string; secretReference:string; tokenEndpointPath:string; tokenPointer:string; expiresInPointer:string; expirySkewSeconds:number}
 export interface ExtensionRegistration {key:string; version:Version; contractVersion:Version; capabilities:readonly string[]}
-export {checkCompatibility, CompatibilityError, compatibilityMatrix} from './version.js';
+export {checkCompatibility, CompatibilityError, compatibilityMatrix, compareVersions, parseVersion} from './version.js';

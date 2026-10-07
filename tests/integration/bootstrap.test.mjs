@@ -49,9 +49,9 @@ test('fresh zero-consumer Core: Flyway, durable OpenFGA, BFF and authorization r
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/admin/applications`)).status,401);
  }
  const sql=statement=>compose('exec','-T','postgres','psql','-U','hive','-d','hive','-At','-c',statement).trim();
- assert.equal(sql("select string_agg(version,',' order by installed_rank) from flyway_schema_history where success"), '1,2,3');
+ assert.equal(sql("select string_agg(version,',' order by installed_rank) from flyway_schema_history where success"), '1,2,3,4');
  // Zero-consumer core: no applications, resources, users, roles, grants, routes or audit rows; only the graph store binding.
- for(const table of ['application','resource','resource_action','hive_user','external_identity','hive_role','hive_group','permission_grant','platform_role_assignment','identity_provider','audit_event','platform_configuration','platform_bootstrap'])assert.equal(sql(`select count(*) from ${table}`),'0',table);
+ for(const table of ['application','resource','resource_action','hive_user','external_identity','hive_role','hive_group','permission_grant','platform_role_assignment','identity_provider','audit_event','platform_configuration','platform_bootstrap','micro_app','artifact_revision','resource_manifest_revision','module_release','navigation_overlay','graph_outbox'])assert.equal(sql(`select count(*) from ${table}`),'0',table);
  assert.equal(sql('select count(*) from graph_store'),'1');
  compose('stop','openfga');
  const down=await fetch('http://127.0.0.1:28082/actuator/health/readiness');

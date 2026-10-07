@@ -83,6 +83,22 @@ NOT EXECUTED: multi-instance outbox contention under load (single instance teste
 Open Blockers: none.
 Commit SHA: see git log (Phase 3 commit is 8cf9cbc).
 
+## Phase 5 — Manifest governance (COMPLETE)
+
+Implemented: module registry with MANIFEST/MANUAL/HYBRID modes; separate resource and micro-frontend manifest contracts with cross-field rejection; canonical checksums; import/fetch → validated draft (real catalog dry-run in a rolled-back transaction) → diff → publish → activate (rollback/roll-forward) → discard drafts; immutable versions enforced in code and by database triggers; immutable artifact revisions; coordinated artifact+resource activation with route/resource validation and cross-module path conflicts; ordered release history; navigation overlays; runtime catalog projection with a monotonic revision; validation endpoint; shared Java/TypeScript compatibility matrix.
+Reused: artifact URL/network policy library (`ui-artifact-security`, 62 migrated tests); version immutability and checksum invariants; bounded, redirect-free fetcher with classified failures.
+Refactored: manifest workflow (module-scoped, framework-neutral, no legacy mixed manifests), coordinated activation.
+Rewritten: manifest contracts and compatibility semantics (`manifestVersion` = content version).
+Dropped: legacy mixed-manifest compatibility path; product-branded panel/slug concepts; panel discovery-resource special case.
+Deferred: none for this phase.
+Tests Added: 6 ManifestDocumentsTest, 16 CompatibilityMatrixTest (shared fixture), 62 artifact-policy tests, 16 shared TS matrix cases + 3 contract tests, `tests/integration/manifests.test.mjs`.
+Tests Executed: mvnw verify; npm test; typecheck; test:manifests; test:authorization; test:bootstrap.
+PASS: 96 Java tests; 25 Node tests; manifest lifecycle integration; authorization and bootstrap regressions (now V1–V4, zero rows in all module/manifest tables).
+FAIL: overlay staleness assertion was wrong (a second update at revision 0 legitimately succeeds) — test corrected. Release history ordering was nondeterministic (same-transaction timestamps); added a sequence column. Both reran PASS.
+NOT EXECUTED: fetch over TLS against a real CDN; DNS-failure classification (requires an unresolvable resolver in CI; covered by code path only).
+Open Blockers: none.
+Commit SHA: see git log (Phase 4 commit is d78f47d).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

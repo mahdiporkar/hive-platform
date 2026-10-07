@@ -1,0 +1,21 @@
+{
+  "description": "Executable compatibility matrix shared by @hive-platform/contracts (TypeScript) and the authorization service (Java). Platform 0.1.x supports contractVersion 1.0-1.1 (1.0 deprecated), schemaVersion 1.0.x, runtimeVersion 1.0.x; manifestVersion is the content version and must be valid SemVer.",
+  "cases": [
+    {"name": "supported combination", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "ok", "warnings": []},
+    {"name": "compatible patches and any content version", "descriptor": {"contractVersion": "1.1.20", "schemaVersion": "1.0.7", "runtimeVersion": "1.0.3", "manifestVersion": "7.4.2"}, "expect": "ok", "warnings": []},
+    {"name": "deprecated compatible contract", "descriptor": {"contractVersion": "1.0.4", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "ok", "warnings": ["VERSION_DEPRECATED"]},
+    {"name": "unsupported contract major", "descriptor": {"contractVersion": "2.0.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MAJOR_UNSUPPORTED", "field": "contractVersion"},
+    {"name": "legacy contract major", "descriptor": {"contractVersion": "0.9.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MAJOR_UNSUPPORTED", "field": "contractVersion"},
+    {"name": "newer unsupported schema", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.1.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MINOR_UNSUPPORTED", "field": "schemaVersion"},
+    {"name": "unknown future schema major", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "3.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MAJOR_UNSUPPORTED", "field": "schemaVersion"},
+    {"name": "runtime requires newer minor", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.4.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MINOR_UNSUPPORTED", "field": "runtimeVersion"},
+    {"name": "missing contract version", "descriptor": {"schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MISSING", "field": "contractVersion"},
+    {"name": "missing runtime version", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_MISSING", "field": "runtimeVersion"},
+    {"name": "missing manifest version", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0"}, "expect": "VERSION_MISSING", "field": "manifestVersion"},
+    {"name": "pre-release is not guessed", "descriptor": {"contractVersion": "1.1.0-beta", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_INVALID", "field": "contractVersion"},
+    {"name": "partial version", "descriptor": {"contractVersion": "1.1", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_INVALID", "field": "contractVersion"},
+    {"name": "leading zero", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "01.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_INVALID", "field": "schemaVersion"},
+    {"name": "non-string version", "descriptor": {"contractVersion": 1, "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "1.0.0"}, "expect": "VERSION_INVALID", "field": "contractVersion"},
+    {"name": "malformed content version", "descriptor": {"contractVersion": "1.1.0", "schemaVersion": "1.0.0", "runtimeVersion": "1.0.0", "manifestVersion": "latest"}, "expect": "VERSION_INVALID", "field": "manifestVersion"}
+  ]
+}
