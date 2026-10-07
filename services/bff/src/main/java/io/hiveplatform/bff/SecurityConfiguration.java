@@ -19,7 +19,7 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 @Configuration
 public class SecurityConfiguration {
   public static final String[] ANONYMOUS_CAPABLE = {"/api/public/**", "/api/routes/**", "/auth/csrf"};
-  public static final String[] SESSION_REQUIRED = {"/api/me/**", "/api/admin/**"};
+  public static final String[] SESSION_REQUIRED = {"/api/me/**", "/api/admin/**", "/api/integrations/**"};
 
   /** Firewall rejections (encoded traversal, duplicate slashes, backslashes...) are client errors, not authentication failures. */
   @Bean RequestRejectedHandler requestRejectedHandler() { return new HttpStatusRequestRejectedHandler(); }

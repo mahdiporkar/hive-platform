@@ -27,6 +27,7 @@ jobs:
       - run: npm run test:authorization
       - run: npm run test:manifests
       - run: npm run test:routing
+      - run: npm run test:superset
       - run: npm run build:examples
       - run: npm run test:e2e:mfe
       - run: npm run test:e2e:workspace

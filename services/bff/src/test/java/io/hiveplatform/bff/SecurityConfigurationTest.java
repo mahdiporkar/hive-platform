@@ -33,11 +33,14 @@ class SecurityConfigurationTest {
   @MockitoBean LegacyTokens legacy;
   @MockitoBean ObservabilityPublisher observability;
   @MockitoBean TokenRefresh refresh;
+  @MockitoBean io.hiveplatform.bff.proxy.SecretResolver secrets;
+  @MockitoBean org.springframework.data.redis.core.StringRedisTemplate redis;
 
   @Test void anonymousPrivateRequestIsDenied() throws Exception { mvc.perform(get("/api/me/context")).andExpect(status().isUnauthorized()); }
   @Test void forgedActorHeadersCannotGrantAccess() throws Exception { mvc.perform(get("/api/admin/applications").header("X-Hive-Actor", "00000000-0000-0000-0000-000000000000")).andExpect(status().isUnauthorized()); }
   @Test void mutationRequiresCsrf() throws Exception { mvc.perform(post("/api/admin/applications")).andExpect(status().isForbidden()); }
   @Test void csrfAloneDoesNotAuthenticate() throws Exception { mvc.perform(post("/api/admin/applications").with(csrf())).andExpect(status().isUnauthorized()); }
+  @Test void integrationsRequireASession() throws Exception { mvc.perform(get("/api/integrations/superset/bi/health")).andExpect(status().isUnauthorized()); }
   @Test void unknownApiPathsAreDenied() throws Exception { mvc.perform(get("/api/anything")).andExpect(status().isUnauthorized()); }
   @Test void actuatorBeyondHealthIsDenied() throws Exception { mvc.perform(get("/actuator/env")).andExpect(status().isUnauthorized()); }
 

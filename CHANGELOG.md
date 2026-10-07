@@ -13,4 +13,5 @@
 - Operator Console (React + Ant Design) as a pure admin API client; API-only administration acceptance test.
 - React adapter, default shell, React + Tailwind proof consumer with SSR public site; public, hybrid and authenticated routes end to end.
 - hive CLI (validate, doctor, up/down, scaffolding, register), container images and full-stack compose, all extension points.
+- Optional Superset integration through an authorized API tunnel with asset grants.
 - No production release or completion of the full platform specification is claimed.

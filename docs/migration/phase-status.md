@@ -195,6 +195,22 @@ NOT EXECUTED: publishing packages to a registry; Windows-native (non-Docker) ser
 Open Blockers: none.
 Commit SHA: see git log (Phase 10 commit is 862160b).
 
+## Phase 12 — Optional integrations (COMPLETE)
+
+Implemented: optional Superset integration — instance registry with TLS-by-default, network policy and secret references; asset registry mapped to catalog resources (asset grants via ordinary grants); BFF same-origin authorized tunnel with an operation allowlist, body-based asset identification for chart data, server-side service-account token (encrypted, revision-scoped, dropped on 401), no cookie forwarding either way, size limits, API logs and audit; health recording; enable/disable lifecycle; Operator Console page.
+Reused: request-body asset inspector behavior; asset-grant concept; exact-origin target policy.
+Refactored: integration registry onto the generic catalog and graph.
+Rewritten: tunnel (stock Superset REST API with a service account instead of a customized Superset and cookie rewriting) — ADR-011.
+Dropped: REMOTE_USER header trust, product-branded headers, cookie/location rewriting, Superset demo assets and roles.
+Deferred: embedding Superset's UI (guest tokens), per-user RLS, mTLS to Superset (ADR-011).
+Tests Added: `tests/integration/superset.test.mjs`, Superset fixture, BFF security test for integration sessions.
+Tests Executed: mvnw verify; typecheck; build:console; test:superset.
+PASS: Superset integration suite; 123 Java tests; typecheck.
+FAIL (fixed): encoded traversal assertion needed a raw HTTP request (client normalization).
+NOT EXECUTED: a real Superset instance.
+Open Blockers: none.
+Commit SHA: see git log (Phase 11 commit is b4f0694).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

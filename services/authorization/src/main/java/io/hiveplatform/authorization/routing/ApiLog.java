@@ -59,7 +59,7 @@ public class ApiLog {
 
   public record BffEvent(String eventType, String outcome, String actorId, String correlationId, Map<String, Object> details) {}
   /** Audit events the BFF may originate; anything else is rejected rather than trusted. */
-  private static final Set<String> BFF_EVENTS = Set.of("legacy-token.acquired", "legacy-token.failed", "legacy-token.invalidated");
+  private static final Set<String> BFF_EVENTS = Set.of("legacy-token.acquired", "legacy-token.failed", "legacy-token.invalidated", "integration.superset.token.acquired");
 
   @Transactional
   public int recordEvents(List<BffEvent> events) {

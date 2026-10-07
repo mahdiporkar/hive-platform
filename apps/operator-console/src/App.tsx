@@ -5,7 +5,7 @@ import type {HiveContext, PlatformRole} from '@hive-platform/contracts';
 import {errorText, http, loadContext} from './api';
 import {ApiLogsPage, AuditPage} from './pages/Logs';
 import {ApplicationDetailPage, ApplicationsPage, ModuleDetailPage, ModulesPage} from './pages/Catalog';
-import {DiagnosticsPage, FlagsPage, LegacyProfilesPage, RoutesPage, TargetsPage} from './pages/Integration';
+import {DiagnosticsPage, FlagsPage, LegacyProfilesPage, RoutesPage, SupersetPage, TargetsPage} from './pages/Integration';
 import {GrantsPage, GroupsPage, IdentityProvidersPage, PlatformRolesPage, RolesPage, UsersPage} from './pages/Security';
 
 /** Menu entries with the platform roles that can use them (UI hint; the control plane enforces every call). */
@@ -22,6 +22,7 @@ const SECTIONS: {key: string; label: string; roles: PlatformRole[]}[] = [
   {key: '/service-targets', label: 'Service targets', roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
   {key: '/legacy-auth', label: 'Legacy authentication', roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/routes', label: 'Proxy routes', roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
+  {key: '/superset', label: 'Superset (optional)', roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/feature-flags', label: 'Feature flags', roles: ['OPERATOR', 'AUDITOR']},
   {key: '/audit', label: 'Audit log', roles: ['AUDITOR']},
   {key: '/api-logs', label: 'API logs', roles: ['AUDITOR']},
@@ -79,6 +80,7 @@ export function App() {
               <Route path="/service-targets" element={<TargetsPage />} />
               <Route path="/legacy-auth" element={<LegacyProfilesPage />} />
               <Route path="/routes" element={<RoutesPage />} />
+              <Route path="/superset" element={<SupersetPage />} />
               <Route path="/feature-flags" element={<FlagsPage />} />
               <Route path="/audit" element={<AuditPage />} />
               <Route path="/api-logs" element={<ApiLogsPage />} />

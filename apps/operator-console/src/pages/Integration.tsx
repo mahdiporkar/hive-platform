@@ -97,3 +97,20 @@ export function DiagnosticsPage() {
     </Card>
   );
 }
+
+interface SupersetIntegration {key: string; applicationKey: string; displayName: string; baseUrl: string; tlsRequired: boolean; credentialReference: string; resourceKey: string; enabled: boolean; healthStatus: string; revision: number}
+
+export function SupersetPage() {
+  return <EntityPage<SupersetIntegration> title="Superset integrations (optional)" path="/integrations/superset" testId="superset" rowKey="key"
+    columns={[{title: 'Key', dataIndex: 'key'}, {title: 'Application', dataIndex: 'applicationKey'}, {title: 'Base URL', dataIndex: 'baseUrl'},
+      {title: 'TLS', render: (_, i) => i.tlsRequired ? <Tag color="green">required</Tag> : <Tag color="orange">not required</Tag>},
+      {title: 'Resource', dataIndex: 'resourceKey'}, {title: 'Health', dataIndex: 'healthStatus'}, {title: 'Enabled', render: (_, i) => i.enabled ? <Tag color="green">on</Tag> : <Tag>off</Tag>}]}
+    create={{label: 'New Superset integration', fields: [{name: 'key', label: 'Key', required: true}, {name: 'applicationKey', label: 'Owning application', required: true},
+      {name: 'displayName', label: 'Display name', required: true}, {name: 'baseUrl', label: 'Base URL', required: true}, {name: 'tlsRequired', label: 'Require TLS', type: 'switch', initial: true},
+      {name: 'credentialReference', label: 'Service account reference (env:HIVE_SECRET_* or file:*)', required: true}]}}
+    actions={[{label: 'Register asset', testId: i => `superset-asset-${i.key}`, run: async i => {
+      const value = window.prompt('Asset as TYPE:id (DASHBOARD:12 or CHART:7)');
+      if (value) { const [assetType, assetId] = value.split(':'); await admin.post(`/integrations/superset/${i.key}/assets`, {assetType, assetId}); }
+    }}, {label: 'Disable', testId: i => `superset-disable-${i.key}`, visible: i => i.enabled, run: i => admin.put(`/integrations/superset/${i.key}`, {enabled: false, revision: i.revision})},
+      {label: 'Enable', testId: i => `superset-enable-${i.key}`, visible: i => !i.enabled, run: i => admin.put(`/integrations/superset/${i.key}`, {enabled: true, revision: i.revision})}]} />;
+}
