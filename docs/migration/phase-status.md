@@ -51,21 +51,21 @@ NOT EXECUTED: hosted GitHub Actions, MFE lifecycle behavior and browser E2E (run
 Open Blockers: none for identity implementation. Contract declarations are not server functionality.
 Commit SHA: see commit introducing this section; Phase 1 commit is de59b43dcd974e7c458d01e940ea901ce2034df1.
 
-## Phase 3 — Identity (OPEN)
+## Phase 3 — Identity and session (COMPLETE)
 
-Implemented: primary OIDC Authorization Code with PKCE; server-side Redis session; Secure/HttpOnly/SameSite cookie; token-free session principal; AES-GCM encrypted vault; key rotation primitive; bounded token refresh; Redis refresh ownership; fixed absolute session deadline; CSRF-protected logout; safe return URL.
-Reused: reviewed TokenVaultCrypto behavior, selectively migrated with its package namespace changed.
-Refactored: source token-free login/vault behavior to servlet security with request-only authorized-client handoff.
+Implemented: primary OIDC Authorization Code + PKCE; dynamic control-plane identity providers with deployment origin allow-list, secret references and optimistic revisions; tenant/domain/provider login routing; canonical users with external identity aliases; idempotent concurrent login synchronization; Redis session with Secure/HttpOnly/SameSite cookie; token-free principal; AES-GCM vault with key rotation; bounded, lease-coordinated refresh; absolute session deadline; CSRF-protected logout; safe return URLs; audit rows for identity changes.
+Reused: TokenVaultCrypto behavior.
+Refactored: token-free login/vault, dynamic provider registry, canonical identity resolver (servlet transport, explicit alias linking only).
 Rewritten: return-URL validation, bounded refresh transport, refresh ownership/revocation write guard.
-Dropped: source-specific integration-cookie cleanup from mandatory identity runtime.
-Deferred: no mandatory requirement removed. Dynamic providers, canonical aliases/login synchronization and remaining acceptance tests are unfinished, not release deferrals.
-Tests Added: 10 Java security primitive tests and 1 real HTTP OIDC/Redis integration scenario.
-Tests Executed: clean npm install; typecheck; npm test; Maven verify; bootstrap integration; identity integration.
-PASS: 14 Node architecture/contract tests; 20 Java tests, zero skipped; 2 real integration scenarios. OIDC fixture verifies code/PKCE, session rotation, cookie flags, server refresh, encrypted vault, token-free Redis principal, CSRF enforcement, logout and post-logout denial. Bootstrap regression remains passing.
-FAIL: intermediate configuration concatenation was detected by Maven and fixed; redirect assertion was corrected to compare equivalent same-origin URLs. Both reruns passed.
-NOT EXECUTED: real-browser login, Keycloak interoperability, provider management, canonical synchronization, refresh race/adversarial integration matrix. Therefore Phase 3 is not complete and Phases 4–15 have not started.
-Open Blockers: unfinished engineering and validation listed above; no missing user confirmation is asserted.
-Commit SHA: see the commit introducing this section.
+Dropped: source integration-cookie cleanup from the mandatory identity runtime.
+Deferred: RP-initiated IdP logout (`end_session_endpoint`); LDAP/OU directory integration (optional, see capability map).
+Tests Added: identity browser checks, five ID-token fault cases, concurrent refresh, dynamic provider/alias/tenant cases, Keycloak interoperability test; shared stack harness `tests/support/stack.mjs`.
+Tests Executed: npm ci; typecheck; npm test; mvnw verify; test:bootstrap; test:identity; test:keycloak.
+PASS: 14 Node tests; 20 Java tests; bootstrap; identity (fixture IdP + Edge); Keycloak 26.3.3 browser login.
+FAIL: first identity run failed because the browser landed on a BFF-denied return path and Playwright treated the empty 403 as a navigation error; the test was corrected to assert the redirect target and probe from a same-origin document. First Keycloak run was cancelled by an event-loop drain during readiness polling; the harness now keeps a referenced timer. Both reran PASS.
+NOT EXECUTED: production IdP over TLS (Phase 13).
+Open Blockers: none.
+Commit SHA: recorded in the following phase section.
 
 ## Requested release verification matrix
 

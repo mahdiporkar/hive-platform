@@ -1,0 +1,12 @@
+package io.hiveplatform.bff.security;
+import java.net.URI;
+import java.util.*;
+import org.springframework.security.oauth2.client.registration.*;
+import org.springframework.security.oauth2.core.*;
+/** No stale registry cache: revocation and optimistic updates apply on the next resolution. */
+public final class DynamicRegistrations implements ClientRegistrationRepository {
+ private final ClientRegistration primary;private final IdentityControlClient control;private final Set<String> origins;private final boolean local;
+ public DynamicRegistrations(ClientRegistration primary,IdentityControlClient control,String origins,boolean local){this.primary=primary;this.control=control;this.origins=Set.copyOf(Arrays.stream(origins.split(",")).map(String::trim).filter(s->!s.isBlank()).toList());this.local=local;}
+ public ClientRegistration findByRegistrationId(String id){if("primary".equals(id))return primary;var p=control.provider(id);for(String value:new String[]{p.issuer(),p.authorizationEndpoint(),p.tokenEndpoint(),p.jwksUri()})validate(value);if(!p.secretReference().matches("env:HIVE_IDP_[A-Z0-9_]{1,100}"))throw new IllegalArgumentException("Invalid secret reference");String secret=System.getenv(p.secretReference().substring(4));if(secret==null||secret.isBlank())throw new IllegalStateException("Provider secret unavailable");return ClientRegistration.withRegistrationId(p.code()).clientName(p.name()).clientId(p.clientId()).clientSecret(secret).clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC).authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE).scope("openid","profile").redirectUri("{baseUrl}/login/oauth2/code/{registrationId}").issuerUri(p.issuer()).authorizationUri(p.authorizationEndpoint()).tokenUri(p.tokenEndpoint()).jwkSetUri(p.jwksUri()).userNameAttributeName("sub").clientSettings(ClientRegistration.ClientSettings.builder().requireProofKey(true).build()).build();}
+ private void validate(String value){URI uri=URI.create(value);if(uri.getHost()==null||uri.getUserInfo()!=null||uri.getQuery()!=null||uri.getFragment()!=null||!origins.contains(uri.getScheme()+"://"+uri.getRawAuthority()))throw new IllegalArgumentException("Provider endpoint origin not approved by BFF");if(!"https".equals(uri.getScheme())&&!(local&&"http".equals(uri.getScheme())&&Set.of("localhost","127.0.0.1").contains(uri.getHost())))throw new IllegalArgumentException("Provider requires HTTPS");}
+}

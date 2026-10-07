@@ -1,0 +1,37 @@
+{
+  "realm": "hive-test",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "accessTokenLifespan": 300,
+  "clients": [
+    {
+      "clientId": "hive-bff",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "test-only-keycloak-client-secret-0001",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:29304/login/oauth2/code/primary"],
+      "webOrigins": ["http://127.0.0.1:29304"],
+      "attributes": {"pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://127.0.0.1:29304/*"}
+    }
+  ],
+  "users": [
+    {
+      "username": "fixture.operator",
+      "enabled": true,
+      "email": "fixture.operator@example.test",
+      "emailVerified": true,
+      "firstName": "Fixture",
+      "lastName": "Operator",
+      "credentials": [{"type": "password", "value": "test-only-password", "temporary": false}],
+      "requiredActions": []
+    }
+  ]
+}

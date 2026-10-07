@@ -6,7 +6,7 @@ import {mkdirSync,openSync,closeSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {authorizationModel} from '../../tools/openfga-model.mjs';
 const project=`hive-test-${Date.now()}`;
-const env={...process.env,HIVE_DB_PASSWORD:randomBytes(24).toString('hex'),HIVE_GRAPH_PASSWORD:randomBytes(24).toString('hex'),HIVE_DB_PORT:'25432',HIVE_FGA_PORT:'28080'};
+const env={...process.env,HIVE_REDIS_PASSWORD:randomBytes(24).toString('hex'),HIVE_DB_PASSWORD:randomBytes(24).toString('hex'),HIVE_GRAPH_PASSWORD:randomBytes(24).toString('hex'),HIVE_DB_PORT:'25432',HIVE_FGA_PORT:'28080'};
 const compose=(...args)=>execFileSync('docker',['compose','-p',project,'-f','infra/docker-compose/compose.yml',...args],{env,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:120000});
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function healthy(url) {
@@ -49,7 +49,7 @@ test('fresh zero-consumer Core: Flyway, durable OpenFGA, BFF and authorization r
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/admin/applications`)).status,401);
  }
  const sql=statement=>compose('exec','-T','postgres','psql','-U','hive','-d','hive','-At','-c',statement).trim();
- assert.equal(sql('select version from flyway_schema_history where success'), '1');
+ assert.equal(sql("select string_agg(version,',' order by installed_rank) from flyway_schema_history where success"), '1,2');
  for(const table of ['application','audit_event','platform_configuration'])assert.equal(sql(`select count(*) from ${table}`),'0');
  compose('stop','openfga');
  const down=await fetch('http://127.0.0.1:28082/actuator/health/readiness');

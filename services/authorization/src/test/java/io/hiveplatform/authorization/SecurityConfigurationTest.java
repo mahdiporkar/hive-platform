@@ -7,7 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-@WebMvcTest
+@WebMvcTest(excludeFilters=@org.springframework.context.annotation.ComponentScan.Filter(type=org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE,classes=io.hiveplatform.authorization.identity.IdentityController.class))
 @Import(SecurityConfiguration.class)
 class SecurityConfigurationTest {
  @Autowired MockMvc mvc;

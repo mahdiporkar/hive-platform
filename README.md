@@ -14,9 +14,10 @@ Requires Node 22+, npm, Java 21, Maven 3.9+ and Docker with Linux containers.
 npm ci
 npm run typecheck
 npm test
-mvn -B verify
+./mvnw -B verify
 npm run test:bootstrap
 npm run test:identity
+npm run test:keycloak
 ```
 
 Integration tests create isolated test containers, volumes and local Java processes, then clean them up. Bootstrap uses ports 25432, 28080, 28081 and 28082. Identity uses ports 26379, 28180 and 28181. Logs remain in ignored `.local/`. The identity fixture uses signed JWTs and a manual HTTP cookie jar; it is not browser E2E.

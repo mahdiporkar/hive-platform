@@ -1,25 +1,27 @@
 {
-    "name":  "hive-platform",
-    "version":  "0.1.0-dev.0",
-    "private":  true,
-    "type":  "module",
-    "engines":  {
-                    "node":  "\u003e=22"
-                },
-    "workspaces":  [
-                       "packages/*"
-                   ],
-    "scripts":  {
-                    "build":  "node tools/build.mjs",
-                    "typecheck":  "tsc -p tsconfig.json --noEmit",
-                    "test":  "npm run build \u0026\u0026 node --test tests/architecture/*.test.mjs tests/contracts/*.test.mjs",
-                    "test:architecture":  "node --test tests/architecture/*.test.mjs",
-                    "test:contracts":  "npm run build \u0026\u0026 node --test tests/contracts/*.test.mjs",
-                    "verify:repository":  "node tools/verify-repository.mjs",
-                    "test:bootstrap":  "node --test tests/integration/bootstrap.test.mjs",
-                    "test:identity":  "node --test tests/integration/identity.test.mjs"
-                },
-    "devDependencies":  {
-                            "typescript":  "5.9.2"
-                        }
+    "name": "hive-platform",
+    "version": "0.1.0-dev.0",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": ">=22"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "node tools/build.mjs",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "test": "npm run build && node --test tests/architecture/*.test.mjs tests/contracts/*.test.mjs",
+        "test:architecture": "node --test tests/architecture/*.test.mjs",
+        "test:contracts": "npm run build && node --test tests/contracts/*.test.mjs",
+        "verify:repository": "node tools/verify-repository.mjs",
+        "test:bootstrap": "node --test tests/integration/bootstrap.test.mjs",
+        "test:identity": "node --test tests/integration/identity.test.mjs",
+        "test:keycloak": "node --test tests/integration/keycloak.test.mjs"
+    },
+    "devDependencies": {
+        "playwright": "1.63.0",
+        "typescript": "5.9.2"
+    }
 }

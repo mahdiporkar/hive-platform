@@ -28,13 +28,14 @@ public class IdentityConfiguration {
  public static final String VAULT_HANDLE="HIVE_VAULT_HANDLE",RETURN_URL="HIVE_RETURN_URL";
  @Bean TokenVault tokenVault(StringRedisTemplate redis,ObjectMapper json,@Value("${hive.vault.key-id}")String id,@Value("${hive.vault.key}")String key,@Value("${hive.vault.previous-keys:}")String previous){return new TokenVault(redis,json,new TokenVaultCrypto(id,key,previous));}
  @Bean TokenRefresh tokenRefresh(TokenVault vault,StringRedisTemplate redis,ClientRegistrationRepository providers,ObjectMapper json){return new TokenRefresh(vault,redis,providers,json);}
- @Bean ClientRegistrationRepository registrations(@Value("${hive.identity.issuer}")String issuer,@Value("${hive.identity.client-id}")String client,@Value("${hive.identity.client-secret}")String secret,@Value("${hive.identity.allow-local-http:false}")boolean local){
+ @Bean IdentityControlClient identityControl(@Value("${hive.identity.control-url}")String url,@Value("${hive.identity.control-password}")String password,@Value("${hive.identity.allow-local-http:false}")boolean local,ObjectMapper json){return new IdentityControlClient(url,password,local,json);}
+ @Bean ClientRegistrationRepository registrations(IdentityControlClient control,@Value("${hive.identity.allowed-origins:}")String origins,@Value("${hive.identity.issuer}")String issuer,@Value("${hive.identity.client-id}")String client,@Value("${hive.identity.client-secret}")String secret,@Value("${hive.identity.allow-local-http:false}")boolean local){
   var uri=java.net.URI.create(issuer);
   if(!"https".equals(uri.getScheme())&&!(local&&"http".equals(uri.getScheme())&&java.util.Set.of("localhost","127.0.0.1").contains(uri.getHost())))throw new IllegalArgumentException("OIDC issuer requires HTTPS");
   var registration=ClientRegistrations.fromIssuerLocation(issuer).registrationId("primary").clientId(client).clientSecret(secret).scope("openid","profile").redirectUri("{baseUrl}/login/oauth2/code/{registrationId}").clientSettings(ClientRegistration.ClientSettings.builder().requireProofKey(true).build()).build();
-  return new InMemoryClientRegistrationRepository(registration);
+  return new DynamicRegistrations(registration,control,origins,local);
  }
- @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations) throws Exception {
+ @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations,IdentityControlClient control) throws Exception {
   var clients=new RequestAuthorizedClients();var contexts=new HttpSessionSecurityContextRepository();
   return http.securityMatcher("/auth/**","/oauth2/**","/login/oauth2/**","/api/me/**")
    .authorizeHttpRequests(auth->auth.requestMatchers("/api/me/**").authenticated().anyRequest().permitAll())
@@ -42,7 +43,7 @@ public class IdentityConfiguration {
    .securityContext(context->context.securityContextRepository(contexts))
    .exceptionHandling(errors->errors.authenticationEntryPoint((request,response,error)->response.sendError(401)))
    .oauth2Login(login->login.clientRegistrationRepository(registrations).authorizedClientRepository(clients)
-    .failureHandler((request,response,error)->{var session=request.getSession(false);if(session!=null)session.invalidate();response.sendError(401);})
+    .failureHandler((request,response,error)->{var session=request.getSession(false);if(session!=null){Object previous=session.getAttribute(VAULT_HANDLE);if(previous instanceof String handle)vault.delete(handle);session.invalidate();}response.sendError(401);})
     .successHandler((request,response,authentication)->{
      try {
       var oauth=(OAuth2AuthenticationToken)authentication;var oidc=(OidcUser)oauth.getPrincipal();
@@ -50,10 +51,11 @@ public class IdentityConfiguration {
       if(client==null||client.getAccessToken().getExpiresAt()==null)throw new IllegalStateException("Validated token missing");
       var registration=client.getClientRegistration();
       if(!registration.getProviderDetails().getIssuerUri().equals(oidc.getIssuer().toString()))throw new IllegalStateException("Issuer mismatch");
+      var canonical=control.sync(registration.getRegistrationId(),oidc.getIssuer().toString(),oidc.getSubject(),oidc.getFullName()==null?oidc.getSubject():oidc.getFullName());
       var session=request.getSession();Object old=session.getAttribute(VAULT_HANDLE);if(old instanceof String handle)vault.delete(handle);
       String handle=vault.store(new VaultRecord(registration.getRegistrationId(),client.getAccessToken().getTokenValue(),client.getRefreshToken()==null?null:client.getRefreshToken().getTokenValue(),client.getAccessToken().getExpiresAt(),Instant.now().plusSeconds(1800)));
       session.setAttribute(VAULT_HANDLE,handle);session.setMaxInactiveInterval(1800);
-      var identity=new SessionIdentity(oidc.getIssuer().toString(),oidc.getSubject(),oidc.getFullName()==null?oidc.getSubject():oidc.getFullName());
+      var identity=new SessionIdentity(canonical.id(),canonical.tenantId(),canonical.issuer(),canonical.subject(),canonical.displayName());
       var safe=SecurityContextHolder.createEmptyContext();safe.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(identity,null,List.of()));
       SecurityContextHolder.setContext(safe);contexts.saveContext(safe,request,response);
       clients.removeAuthorizedClient(registration.getRegistrationId(),oauth,request,response);

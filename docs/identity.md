@@ -1,16 +1,49 @@
-# Identity implementation status
+# Identity and session
 
-Phase 3 is in progress. The implemented primary OIDC flow uses Spring Security Authorization Code with PKCE, issuer validation, server-side Redis sessions and encrypted server-side token storage. The browser receives HIVE_SESSION with Secure, HttpOnly and SameSite=Lax attributes. A transient request-only authorized-client repository prevents OAuth clients from being written into ordinary session attributes. After login, the security principal is replaced with a token-free SessionIdentity.
+Implemented in `services/bff` (OAuth client, session, vault, refresh) and `services/authorization` (`identity` package: providers, canonical users, aliases). Design decisions: [ADR-008](adr/ADR-008-identity-and-session.md).
 
-Enable with HIVE_IDENTITY_ENABLED=true and configure HIVE_OIDC_ISSUER, HIVE_OIDC_CLIENT_ID, HIVE_OIDC_CLIENT_SECRET, HIVE_VAULT_KEY (Base64 256-bit key), HIVE_REDIS_HOST, HIVE_REDIS_PORT and HIVE_REDIS_PASSWORD. Secrets must be supplied by deployment configuration, never committed. The issuer requires HTTPS; a separate local-test flag permits only localhost/127.0.0.1 HTTP. External TLS termination must preserve a trusted public origin; production ingress configuration is not implemented yet.
+```mermaid
+sequenceDiagram
+  autonumber
+  participant B as Browser
+  participant F as BFF
+  participant I as Identity Provider
+  participant A as Authorization service
+  participant R as Redis
+  B->>F: GET /auth/login?returnUrl=/path[&provider|tenant|domain]
+  F->>A: GET /internal/identity/route (only when a selector is given)
+  F-->>B: 302 /oauth2/authorization/{code}
+  B->>I: authorize (code_challenge S256, state, nonce)
+  I-->>B: 302 /login/oauth2/code/{code}?code&state
+  B->>F: callback
+  F->>I: token exchange (client secret, code_verifier) — server side only
+  F->>F: validate ID token (issuer, audience, signature, expiry, nonce)
+  F->>A: POST /internal/identity/login (provider, issuer, subject, name)
+  A-->>F: canonical user id + tenant
+  F->>R: store AES-GCM vault record; session holds handle + token-free principal
+  F-->>B: 302 returnUrl, Set-Cookie HIVE_SESSION (new id; Secure; HttpOnly; SameSite=Lax)
+```
 
-- GET /auth/login?returnUrl=/local/path starts login.
-- GET /auth/csrf obtains the CSRF header name and token.
-- GET /api/me/session returns safe identity metadata after checking the vault and refreshing expiring tokens.
-- POST /auth/logout requires CSRF, deletes the vault entry and invalidates the session.
+## Configuration
 
-Refresh uses a bounded response subscriber, a five-second HTTP deadline and a Redis ownership lease. The final encrypted write atomically checks both lease ownership and continued existence of the session vault record, preventing logout from being undone by an in-flight refresh. Refresh cannot extend the absolute session deadline. Idle vault entries expire automatically.
+BFF: `HIVE_IDENTITY_ENABLED=true`, `HIVE_OIDC_ISSUER`, `HIVE_OIDC_CLIENT_ID`, `HIVE_OIDC_CLIENT_SECRET`, `HIVE_VAULT_KEY` (Base64 256-bit), optional `HIVE_VAULT_KEY_ID`/`HIVE_VAULT_PREVIOUS_KEYS`, `HIVE_REDIS_HOST|PORT|PASSWORD`, `HIVE_AUTHORIZATION_URL`, `HIVE_INTERNAL_PASSWORD`, `HIVE_IDP_ALLOWED_ORIGINS` and one `HIVE_IDP_<NAME>` variable per dynamic provider secret reference.
 
-Executed HTTP integration evidence uses a signed-JWT OIDC fixture and real Redis: PKCE, session ID rotation, cookie flags, refresh, token-free Redis session, encrypted vault, CSRF denial and logout cleanup. It uses an explicit HTTP cookie jar, not a real browser. Browser behavior and production IdP interoperability remain NOT EXECUTED.
+Authorization service: `HIVE_PRIMARY_ISSUER`, `HIVE_IDP_ALLOWED_ORIGINS`, `HIVE_INTERNAL_PASSWORD` (BFF runtime principal), `HIVE_PROVISIONING_PASSWORD` (machine provisioning principal).
 
-Remaining Phase 3 requirements: dynamic external provider persistence and routing, canonical identity aliases/login synchronization, adversarial OIDC response matrix, refresh concurrency/revocation integration tests and browser validation. No later feature phase is declared complete.
+HTTPS is mandatory for issuers and endpoints; `HIVE_OIDC_ALLOW_LOCAL_HTTP`/`HIVE_IDP_ALLOW_LOCAL_HTTP` permit plain HTTP only for `localhost`/`127.0.0.1` in tests.
+
+## Endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /auth/login?returnUrl=&provider=&tenant=&domain=` | Start login. `returnUrl` must be a local path (no scheme, authority, traversal, backslash, control characters or auth loop). |
+| `GET /auth/csrf` | CSRF header name and token for mutating calls. |
+| `POST /auth/logout` | CSRF-protected; deletes the vault record and invalidates the session. |
+| `GET /api/me/session` | Token-free identity and absolute expiry; refreshes the access token server-side when it is within 15 s of expiry. |
+| `GET/POST/PUT /provisioning/identity/providers` | Machine provisioning of dynamic providers (optimistic `revision`). Also exposed to platform security administrators through the admin API. |
+| `POST /provisioning/identity/aliases` | Explicitly link an additional external identity to a canonical user in the same tenant. |
+
+## Executed evidence
+
+- `npm run test:identity` — fixture IdP with signed JWTs; PKCE verified at the token endpoint; session-id rotation; cookie flags; 8 concurrent session calls on an expiring token cause exactly one refresh; vault is encrypted and the Redis session hash contains no tokens or OIDC authorities; CSRF-protected logout clears the vault; dynamic provider create/duplicate/unapproved-origin/stale-revision/disabled cases; domain+tenant routing; explicit cross-issuer alias keeps the canonical id; 6 concurrent first logins produce one user; cross-tenant alias rejected; Edge browser login with `returnUrl` and `document.cookie` secrecy; issuer, audience, expiry, nonce and signature faults rejected without creating a session.
+- `npm run test:keycloak` — real Keycloak 26.3.3 login page in Edge; server-side token exchange only; canonical identity synchronized; logout clears vault.

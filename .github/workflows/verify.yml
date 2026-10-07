@@ -19,6 +19,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: mvn -B verify
+      - run: ./mvnw -B verify
       - run: npm run test:bootstrap
+      - run: npx playwright install --with-deps chromium
       - run: npm run test:identity
+      - run: npm run test:keycloak
