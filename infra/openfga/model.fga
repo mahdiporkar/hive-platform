@@ -1,0 +1,61 @@
+model
+  schema 1.1
+
+type user
+type group
+  relations
+    define member: [user]
+type role
+  relations
+    define assignee: [user, group#member]
+type application
+  relations
+    define parent: [application]
+    define viewer: [user, group#member, role#assignee]
+    define creator: [user, group#member, role#assignee]
+    define editor: [user, group#member, role#assignee]
+    define deleter: [user, group#member, role#assignee]
+    define sharer: [user, group#member, role#assignee]
+    define exporter: [user, group#member, role#assignee]
+    define manager: [user, group#member, role#assignee] or manager from parent
+    define can_view: viewer or editor or manager
+    define can_create: creator or manager
+    define can_edit: editor or manager
+    define can_delete: deleter or manager
+    define can_share: sharer or manager
+    define can_export: exporter or manager
+    define can_manage: manager
+type resource
+  relations
+    define parent: [application, resource, external_resource]
+    define viewer: [user, group#member, role#assignee]
+    define creator: [user, group#member, role#assignee]
+    define editor: [user, group#member, role#assignee]
+    define deleter: [user, group#member, role#assignee]
+    define sharer: [user, group#member, role#assignee]
+    define exporter: [user, group#member, role#assignee]
+    define manager: [user, group#member, role#assignee] or manager from parent
+    define can_view: viewer or editor or manager
+    define can_create: creator or manager
+    define can_edit: editor or manager
+    define can_delete: deleter or manager
+    define can_share: sharer or manager
+    define can_export: exporter or manager
+    define can_manage: manager
+type external_resource
+  relations
+    define parent: [application, resource, external_resource]
+    define viewer: [user, group#member, role#assignee]
+    define creator: [user, group#member, role#assignee]
+    define editor: [user, group#member, role#assignee]
+    define deleter: [user, group#member, role#assignee]
+    define sharer: [user, group#member, role#assignee]
+    define exporter: [user, group#member, role#assignee]
+    define manager: [user, group#member, role#assignee] or manager from parent
+    define can_view: viewer or editor or manager
+    define can_create: creator or manager
+    define can_edit: editor or manager
+    define can_delete: deleter or manager
+    define can_share: sharer or manager
+    define can_export: exporter or manager
+    define can_manage: manager

@@ -1,0 +1,13 @@
+{
+  "name": "hive-platform",
+  "version": "0.1.0-dev.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "test": "node --test tests/architecture/*.test.mjs",
+    "test:architecture": "node --test tests/architecture/*.test.mjs",
+    "verify:repository": "node tools/verify-repository.mjs",
+    "test:bootstrap": "node --test tests/integration/bootstrap.test.mjs"
+  }
+}
