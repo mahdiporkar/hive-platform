@@ -36,7 +36,11 @@
         "test:e2e:public-hybrid": "node --test tests/e2e/public-hybrid.test.mjs",
         "test:cli": "node --test tests/cli/cli.test.mjs",
         "test:cli:up": "node --test tests/cli/up.test.mjs",
-        "test:superset": "node --test tests/integration/superset.test.mjs"
+        "test:superset": "node --test tests/integration/superset.test.mjs",
+        "test:hardening": "node --test tests/integration/hardening.test.mjs",
+        "test:log-scan": "node --test tests/security/log-scan.test.mjs",
+        "verify:compose": "node tools/verify-compose.mjs",
+        "verify:all": "node tools/verify-all.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

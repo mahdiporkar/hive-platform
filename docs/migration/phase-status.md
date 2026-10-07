@@ -211,6 +211,22 @@ NOT EXECUTED: a real Superset instance.
 Open Blockers: none.
 Commit SHA: see git log (Phase 11 commit is b4f0694).
 
+## Phase 13 — Production hardening (COMPLETE)
+
+Implemented: fail-closed production profile (default) in both services via a shared `ProductionGuard`; startup diagnostics without secrets; trusted-proxy forwarded headers; graceful shutdown; secret-leak scan over all service logs; compose validation tool; branding scan; full verification runner (`npm run verify:all`); deployment, security and observability documentation.
+Reused: the reference production-guard concept (fail closed on unsafe configuration).
+Refactored: guard into a reusable starter component with per-service rules.
+Rewritten: none.
+Dropped: none.
+Deferred: rate limiting/WAF (ingress responsibility); OpenAPI documents; mTLS; multi-instance load testing.
+Tests Added: ProductionGuardTest (4), `tests/integration/hardening.test.mjs` (2), `tests/security/log-scan.test.mjs`, `tests/architecture/branding.test.mjs` (2), `tools/verify-compose.mjs`.
+Tests Executed: mvnw verify; test:hardening; test:log-scan; branding scan; verify:compose.
+PASS: 127 Java tests; hardening (unsafe refusal, clean production start, forwarded headers); 35 service logs clean; branding scan; both compose files valid.
+FAIL (fixed): a guard test's own substring assertion was wrong ("unsafe;" contains "safe;").
+NOT EXECUTED: TLS termination in front of the gateway (documented, not run locally).
+Open Blockers: none.
+Commit SHA: see git log (Phase 12 commit is 1520119).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

@@ -14,4 +14,5 @@
 - React adapter, default shell, React + Tailwind proof consumer with SSR public site; public, hybrid and authenticated routes end to end.
 - hive CLI (validate, doctor, up/down, scaffolding, register), container images and full-stack compose, all extension points.
 - Optional Superset integration through an authorized API tunnel with asset grants.
+- Production hardening: fail-closed production profile, forwarded headers, log secrecy scan, branding scan, verification runner.
 - No production release or completion of the full platform specification is claimed.

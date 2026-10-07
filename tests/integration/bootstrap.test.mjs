@@ -44,7 +44,7 @@ test('fresh zero-consumer Core: Flyway, durable OpenFGA, BFF and authorization r
  assert.equal(retained.status,200,'model survives OpenFGA restart');
  for(const [service,port] of [['authorization','28082'],['bff','28081']]) {
   const fd=openSync(`.local/bootstrap/${service}.log`,'w');logs.push(fd);
-  const child=spawn('java',['-jar',resolve(`services/${service}/target/${service}-0.1.0-SNAPSHOT.jar`)],{windowsHide:true,stdio:['ignore',fd,fd],env:{...env,HIVE_AUTHORIZATION_PORT:'28082',HIVE_BFF_PORT:'28081',HIVE_DB_URL:'jdbc:postgresql://127.0.0.1:25432/hive',HIVE_DB_USER:'hive',HIVE_OPENFGA_URL:'http://127.0.0.1:28080',HIVE_AUTHORIZATION_URL:'http://127.0.0.1:28082',HIVE_CONTROL_ALLOW_HTTP:'true',HIVE_INTERNAL_PASSWORD:internalSecret}});
+  const child=spawn('java',['-jar',resolve(`services/${service}/target/${service}-0.1.0-SNAPSHOT.jar`)],{windowsHide:true,stdio:['ignore',fd,fd],env:{...env,HIVE_PROFILE:'development',HIVE_AUTHORIZATION_PORT:'28082',HIVE_BFF_PORT:'28081',HIVE_DB_URL:'jdbc:postgresql://127.0.0.1:25432/hive',HIVE_DB_USER:'hive',HIVE_OPENFGA_URL:'http://127.0.0.1:28080',HIVE_AUTHORIZATION_URL:'http://127.0.0.1:28082',HIVE_CONTROL_ALLOW_HTTP:'true',HIVE_INTERNAL_PASSWORD:internalSecret}});
   processes.push(child);
   await healthy(`http://127.0.0.1:${port}/actuator/health/readiness`);
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/admin/applications`)).status,401);

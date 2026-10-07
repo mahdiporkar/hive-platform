@@ -49,7 +49,7 @@ export async function startStack(t,{suite,base,authorization=true,bff=true,autho
  compose('up','-d','openfga');
  await ready(stack.urls.fga+'/healthz');
  stack.authorizationEnv={
-  HIVE_AUTHORIZATION_PORT:String(ports.authorization),HIVE_DB_URL:`jdbc:postgresql://127.0.0.1:${ports.db}/hive`,HIVE_DB_USER:'hive',HIVE_DB_PASSWORD:credentials.db,
+  HIVE_PROFILE:'development',HIVE_AUTHORIZATION_PORT:String(ports.authorization),HIVE_DB_URL:`jdbc:postgresql://127.0.0.1:${ports.db}/hive`,HIVE_DB_USER:'hive',HIVE_DB_PASSWORD:credentials.db,
   HIVE_OPENFGA_URL:stack.urls.fga,HIVE_INTERNAL_PASSWORD:credentials.internal,HIVE_PROVISIONING_PASSWORD:credentials.provisioning,
   HIVE_REDIS_HOST:'127.0.0.1',HIVE_REDIS_PORT:String(ports.redis),HIVE_REDIS_PASSWORD:credentials.redis,...authorizationEnv};
  if(authorization){
@@ -57,7 +57,7 @@ export async function startStack(t,{suite,base,authorization=true,bff=true,autho
   await ready(stack.urls.authorization+'/actuator/health/readiness',{log:`${logDir}/authorization.log`});
  }
  stack.bffEnv={
-  HIVE_BFF_PORT:String(ports.bff),HIVE_AUTHORIZATION_URL:stack.urls.authorization,HIVE_INTERNAL_PASSWORD:credentials.internal,HIVE_CONTROL_ALLOW_HTTP:'true',
+  HIVE_PROFILE:'development',HIVE_BFF_PORT:String(ports.bff),HIVE_AUTHORIZATION_URL:stack.urls.authorization,HIVE_INTERNAL_PASSWORD:credentials.internal,HIVE_CONTROL_ALLOW_HTTP:'true',
   HIVE_REDIS_HOST:'127.0.0.1',HIVE_REDIS_PORT:String(ports.redis),HIVE_REDIS_PASSWORD:credentials.redis,HIVE_VAULT_KEY:credentials.vault,...bffEnv};
  if(bff){
   stack.bffProcess=stack.java('bff',stack.bffEnv);
