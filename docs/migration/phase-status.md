@@ -147,6 +147,22 @@ NOT EXECUTED: NEW_WINDOW/POPOUT; non-Chromium browsers.
 Open Blockers: none.
 Commit SHA: see git log (Phase 7 commit is c778a81).
 
+## Phase 9 — Operator Console (COMPLETE)
+
+Implemented: `apps/operator-console` (React 19 + Ant Design 5, Vite) as a pure admin API client: diagnostics, applications and resource trees, modules with manifest import/fetch/diff/publish/rollback and artifact activation, users, groups, roles, grants, platform roles, identity providers, service targets, legacy profiles, proxy routes and operations with preview, feature flags, audit and API logs; role-based menu hints and a no-role screen; identity provider/alias administration endpoints for SECURITY_ADMIN; identity audit entries attribute the real actor; per-workspace `engines` declarations.
+Reused: administrative feature set of the reference admin UI (as requirements, not code).
+Refactored: admin UI into a standalone API client without shell privileges.
+Rewritten: all screens.
+Dropped: reference admin micro-frontend coupling to its shell.
+Deferred: OU/LDAP screens (feature deferred); Superset screens (Phase 12).
+Tests Added: `tests/e2e/operator-console.test.mjs` (E2E 11), `tests/e2e/api-only-administration.test.mjs` (E2E 12 / spec §22).
+Tests Executed: typecheck (incl. console); build:console; mvnw verify; test:e2e:console; test:e2e:api-admin.
+PASS: both E2E suites; typecheck; console build.
+FAIL (fixed): a per-directory Node version shim selected Node 11 for the app folder (engines declared); Ant Design Tree/Result do not forward data-testid (selectors adjusted); API omits null fields so the tree root was not found (console fixed); audit table default page size hid rows (pagination and filter).
+NOT EXECUTED: accessibility audit of the console.
+Open Blockers: none.
+Commit SHA: see git log (Phase 8 commit is c4ec33b).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

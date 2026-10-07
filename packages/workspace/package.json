@@ -19,5 +19,8 @@
     "@hive-platform/core": "*",
     "@hive-platform/mfe-runtime": "*",
     "@hive-platform/authorization": "*"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

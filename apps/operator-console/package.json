@@ -1,0 +1,28 @@
+{
+  "name": "@hive-platform/operator-console",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Official Hive control-plane UI. A pure administrative API client; Hive operates fully without it.",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@hive-platform/contracts": "*",
+    "@hive-platform/http-client": "*",
+    "antd": "5.27.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-router-dom": "7.9.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.15",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.0.4",
+    "vite": "7.1.9"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

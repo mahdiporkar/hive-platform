@@ -14,7 +14,7 @@
     ],
     "scripts": {
         "build": "node tools/build.mjs",
-        "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.examples.json && tsc -p apps/operator-console/tsconfig.json",
         "test": "npm run build && node --test tests/architecture/*.test.mjs tests/contracts/*.test.mjs tests/packages/*.test.mjs",
         "test:architecture": "node --test tests/architecture/*.test.mjs",
         "test:contracts": "npm run build && node --test tests/contracts/*.test.mjs",
@@ -28,7 +28,10 @@
         "test:routing": "node --test tests/integration/routing.test.mjs",
         "build:examples": "node examples/minimal-consumer/build.mjs",
         "test:e2e:mfe": "node --test tests/e2e/mfe-runtime.test.mjs",
-        "test:e2e:workspace": "node --test tests/e2e/workspace.test.mjs"
+        "test:e2e:workspace": "node --test tests/e2e/workspace.test.mjs",
+        "build:console": "cd apps/operator-console && node ../../node_modules/vite/bin/vite.js build",
+        "test:e2e:console": "node --test tests/e2e/operator-console.test.mjs",
+        "test:e2e:api-admin": "node --test tests/e2e/api-only-administration.test.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

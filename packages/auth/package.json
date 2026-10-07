@@ -17,5 +17,8 @@
   "dependencies": {
     "@hive-platform/contracts": "*",
     "@hive-platform/http-client": "*"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

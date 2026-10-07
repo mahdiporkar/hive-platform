@@ -16,5 +16,8 @@
   "sideEffects": false,
   "dependencies": {
     "@hive-platform/contracts": "*"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
