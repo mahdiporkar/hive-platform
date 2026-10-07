@@ -1,61 +1,36 @@
 model
   schema 1.1
 
+# Subjects
 type user
+
 type group
   relations
     define member: [user]
+
 type role
   relations
     define assignee: [user, group#member]
-type application
+
+# Platform administration (control plane). Business roles never receive these relations implicitly.
+type platform
   relations
-    define parent: [application]
-    define viewer: [user, group#member, role#assignee]
-    define creator: [user, group#member, role#assignee]
-    define editor: [user, group#member, role#assignee]
-    define deleter: [user, group#member, role#assignee]
-    define sharer: [user, group#member, role#assignee]
-    define exporter: [user, group#member, role#assignee]
-    define manager: [user, group#member, role#assignee] or manager from parent
-    define can_view: viewer or editor or manager
-    define can_create: creator or manager
-    define can_edit: editor or manager
-    define can_delete: deleter or manager
-    define can_share: sharer or manager
-    define can_export: exporter or manager
-    define can_manage: manager
+    define super_admin: [user, group#member, role#assignee]
+    define operator: [user, group#member, role#assignee] or super_admin
+    define security_admin: [user, group#member, role#assignee] or super_admin
+    define integration_admin: [user, group#member, role#assignee] or super_admin
+    define auditor: [user, group#member, role#assignee] or super_admin
+    define reader: operator or security_admin or integration_admin or auditor
+
+# Resource catalog node. Management is inherited down the resource tree.
 type resource
   relations
-    define parent: [application, resource, external_resource]
-    define viewer: [user, group#member, role#assignee]
-    define creator: [user, group#member, role#assignee]
-    define editor: [user, group#member, role#assignee]
-    define deleter: [user, group#member, role#assignee]
-    define sharer: [user, group#member, role#assignee]
-    define exporter: [user, group#member, role#assignee]
+    define parent: [resource]
     define manager: [user, group#member, role#assignee] or manager from parent
-    define can_view: viewer or editor or manager
-    define can_create: creator or manager
-    define can_edit: editor or manager
-    define can_delete: deleter or manager
-    define can_share: sharer or manager
-    define can_export: exporter or manager
-    define can_manage: manager
-type external_resource
+
+# One object per declared resource action, so solutions may declare arbitrary action keys.
+type action
   relations
-    define parent: [application, resource, external_resource]
-    define viewer: [user, group#member, role#assignee]
-    define creator: [user, group#member, role#assignee]
-    define editor: [user, group#member, role#assignee]
-    define deleter: [user, group#member, role#assignee]
-    define sharer: [user, group#member, role#assignee]
-    define exporter: [user, group#member, role#assignee]
-    define manager: [user, group#member, role#assignee] or manager from parent
-    define can_view: viewer or editor or manager
-    define can_create: creator or manager
-    define can_edit: editor or manager
-    define can_delete: deleter or manager
-    define can_share: sharer or manager
-    define can_export: exporter or manager
-    define can_manage: manager
+    define resource: [resource]
+    define grantee: [user, group#member, role#assignee]
+    define allowed: grantee or manager from resource

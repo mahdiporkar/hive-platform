@@ -18,7 +18,9 @@
         "verify:repository": "node tools/verify-repository.mjs",
         "test:bootstrap": "node --test tests/integration/bootstrap.test.mjs",
         "test:identity": "node --test tests/integration/identity.test.mjs",
-        "test:keycloak": "node --test tests/integration/keycloak.test.mjs"
+        "test:keycloak": "node --test tests/integration/keycloak.test.mjs",
+        "test:authorization": "node --test tests/integration/authorization.test.mjs",
+        "test:model": "node --test tests/integration/openfga-model.test.mjs"
     },
     "devDependencies": {
         "playwright": "1.63.0",

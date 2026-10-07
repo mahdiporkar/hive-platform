@@ -67,6 +67,22 @@ NOT EXECUTED: production IdP over TLS (Phase 13).
 Open Blockers: none.
 Commit SHA: recorded in the following phase section.
 
+## Phase 4 — Authorization and resource catalog (COMPLETE)
+
+Implemented: applications with immutable root nodes; resource catalog (10 types, parent-type matrix, cycle/same-application/ownership checks, archive-only history, optimistic revisions); per-action OpenFGA objects and inherited `manage`; users (pre-provisioning with identity bindings, deactivation), groups, roles, assignments, grants with retained revocation history; platform roles on `platform:hive`; `@PlatformAccess` admin enforcement with actor forwarding and denial audit; transactional graph outbox with ordered, claim-owned projection, backoff and dead-lettering; optional Redis decision cache with epoch invalidation; store resolution/model installation; soft-deleted store detection with full replay; first administrator bootstrap; audit query; runtime decision API with reason codes; shared `hive-spring-boot-starter` (correlation id, PlatformError, redaction).
+Reused: outbox claim/ownership semantics; epoch-based decision cache; first-administrator durable bootstrap.
+Refactored: access administration (subject references, platform/business role split), OpenFGA adapter (HTTP client, idempotent `on_duplicate`/`on_missing`), catalog validation.
+Rewritten: authorization model (per-action objects, platform type, no branded roots); admin authorization (explicit per-handler relations instead of URL heuristics).
+Dropped: reference runtime-policy/obligation evaluation and OU/LDAP directory sync from this milestone (see Deferred); product-specific semantics registry aliases.
+Deferred: runtime policies/obligations; OU/LDAP directory integration; application-scoped delegated administration.
+Tests Added: 9 admin-boundary MockMvc tests, 3 starter tests, `tests/integration/authorization.test.mjs`, `tests/integration/openfga-model.test.mjs`.
+Tests Executed: mvnw verify; npm test; test:model; test:authorization; test:bootstrap; test:identity.
+PASS: 27 Java tests; 14 Node tests; model consistency (2); authorization integration (catalog, grants, inheritance, cache revocation, platform roles, audit, store recovery); bootstrap (now V1–V3, zero business rows); identity regression.
+FAIL: first run showed OpenFGA keeps serving checks for a soft-deleted store, so deletion went unnoticed; added scheduled existence verification. A self-invoked `@Transactional` replay bypassed the proxy; replaced with TransactionTemplate. An empty startup replay produced an audit row on a fresh core; empty replays are no longer audited. All reran PASS.
+NOT EXECUTED: multi-instance outbox contention under load (single instance tested); OpenFGA over TLS.
+Open Blockers: none.
+Commit SHA: see git log (Phase 3 commit is 8cf9cbc).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |
