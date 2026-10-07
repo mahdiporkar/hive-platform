@@ -29,4 +29,5 @@ jobs:
       - run: npm run test:routing
       - run: npm run build:examples
       - run: npm run test:e2e:mfe
+      - run: npm run test:e2e:workspace
       - run: npm run test:keycloak

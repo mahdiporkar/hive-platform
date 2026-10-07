@@ -61,10 +61,14 @@ public class RuntimeContexts {
     Map<String, List<String>> permissions = new LinkedHashMap<>();
     for (var decision : engine.check(userId, checks.subList(0, Math.min(checks.size(), MAX_PERMISSION_CHECKS))))
       if (decision.allowed()) permissions.computeIfAbsent(decision.applicationKey() + ":" + decision.resourceKey(), k -> new ArrayList<>()).add(decision.action());
+    // Members of an application (any permission in it) see all of its routes with their required action, so hosts can
+    // tell "not permitted" from "does not exist". Elsewhere a user sees what anonymous visitors see plus allowed routes.
+    Set<String> memberOf = new LinkedHashSet<>();
+    permissions.keySet().forEach(key -> memberOf.add(key.substring(0, key.indexOf(':'))));
     List<RuntimeCatalog.RuntimeModule> modules = new ArrayList<>();
     for (var module : snapshot.modules()) {
-      var routes = module.routes().stream().filter(route -> route.resource() == null || allowed(permissions, module.applicationKey(), route.resource(), route.action())).toList();
-      // Signed-in users keep everything anonymous visitors can open, plus the protected routes they are allowed.
+      boolean member = memberOf.contains(module.applicationKey());
+      var routes = module.routes().stream().filter(route -> member || route.resource() == null || allowed(permissions, module.applicationKey(), route.resource(), route.action())).toList();
       if (!routes.isEmpty()) modules.add(withRoutes(module, routes));
     }
     var keys = modules.stream().map(RuntimeCatalog.RuntimeModule::applicationKey).collect(java.util.stream.Collectors.toSet());

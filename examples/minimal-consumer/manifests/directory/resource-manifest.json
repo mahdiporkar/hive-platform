@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "applicationKey": "campus-example",
+  "moduleKey": "directory-example",
+  "resources": [
+    {"key": "directory-example", "type": "MODULE", "parentKey": "campus-example", "name": "Directory example", "actions": ["view"]}
+  ]
+}

@@ -131,6 +131,22 @@ NOT EXECUTED: non-Chromium browsers (Firefox/WebKit not installed).
 Open Blockers: none.
 Commit SHA: see git log (Phase 6 commit is 81cca46).
 
+## Phase 8 — Workspace runtime (COMPLETE)
+
+Implemented: `@hive-platform/workspace` — WorkspaceEngine (SINGLE/TABS/SPLIT/DASHBOARD with capacities, serialized per-slot lifecycle, per-slot status/authorization/error, multi-instance modules, in-module update vs cross-module remount, context re-evaluation), HiveEventHub (namespaced, scoped, copied, async, failure-isolated, auto-released subscriptions), session persistence with hostile-state sanitizing and restore, optional plain-DOM renderer with stable slot elements; `directory-example` event-publishing micro-app; plain-DOM workspace host; server context change so application members can see DENIED routes.
+Reused: none (the reference workspace was embedded in a React shell).
+Refactored: route visibility in authenticated contexts (members see all routes of their applications with required actions).
+Rewritten: workspace model and lifecycle outside any UI component tree.
+Dropped: shell-owned workspace state.
+Deferred: NEW_WINDOW / POPOUT layouts (the model anticipates them).
+Tests Added: `tests/packages/workspace.test.mjs` (5), `tests/e2e/workspace.test.mjs` (Edge).
+Tests Executed: npm test; typecheck; mvnw verify; test:e2e:workspace; test:e2e:mfe (regression).
+PASS: 41 Node tests; 122 Java tests; both browser E2E suites.
+FAIL (fixed): the fake DOM lacked APIs used by the renderer (test support extended); revoked access surfaced as ROUTE_NOT_FOUND because contexts hid every non-allowed route (contexts now expose routes to application members; ADR-005).
+NOT EXECUTED: NEW_WINDOW/POPOUT; non-Chromium browsers.
+Open Blockers: none.
+Commit SHA: see git log (Phase 7 commit is c778a81).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

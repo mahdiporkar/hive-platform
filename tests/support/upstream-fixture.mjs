@@ -23,6 +23,7 @@ export async function startUpstream({port,legacyCredential={username:'svc-accoun
    if(!state.legacy.valid.has(token))return send(401,{error:'legacy token rejected'});
    return send(200,{legacy:true,path:url.pathname});
   }
+  if(url.pathname.endsWith('/payments')){const record=url.searchParams.get('record')??'none';return send(200,{payments:[{id:'P-'+record+'-1',amount:120},{id:'P-'+record+'-2',amount:80}]});}
   if(url.pathname.endsWith('/big'))return send(200,{blob:'x'.repeat(2*1024*1024)});
   if(url.pathname.endsWith('/slow')){await new Promise(r=>setTimeout(r,3000));return send(200,{slow:true});}
   if(url.pathname.endsWith('/redirect')){res.writeHead(302,{Location:'http://169.254.169.254/latest/meta-data'});return res.end();}

@@ -27,7 +27,8 @@
         "test:manifests": "node --test tests/integration/manifests.test.mjs",
         "test:routing": "node --test tests/integration/routing.test.mjs",
         "build:examples": "node examples/minimal-consumer/build.mjs",
-        "test:e2e:mfe": "node --test tests/e2e/mfe-runtime.test.mjs"
+        "test:e2e:mfe": "node --test tests/e2e/mfe-runtime.test.mjs",
+        "test:e2e:workspace": "node --test tests/e2e/workspace.test.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

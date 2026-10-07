@@ -50,7 +50,7 @@ async function unmount():Promise<void> {if(mounted){const current=mounted;mounte
 function go(path:string):void {history.pushState(null,'',path);void show(path);}
 
 function renderChrome():void {
- nav.replaceChildren(...context.modules.flatMap(module=>module.routes.filter(r=>r.navigation).map(route=>{
+ nav.replaceChildren(...context.modules.flatMap(module=>module.routes.filter(r=>r.navigation&&routeAccess(r,module,context)==='ALLOWED').map(route=>{
   const link=document.createElement('a');link.href=route.path;link.textContent=route.navigation!.label;link.setAttribute('data-route',`${module.moduleKey}:${route.key}`);
   link.addEventListener('click',event=>{event.preventDefault();go(route.path);});return link;
  })));

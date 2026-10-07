@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hive workspace host (plain DOM)</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 0; color: #1d2433; }
+    header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #d6dbe4; }
+    main { padding: 16px; }
+    .hive-mfe-root { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Workspace host</strong>
+    <span id="layouts"></span>
+    <form id="open"><input name="path" placeholder="/finance" aria-label="Path"><button>Open</button></form>
+    <span id="user"></span>
+  </header>
+  <main id="workspace"></main>
+  <script type="module" src="/host/workspace-host.js"></script>
+</body>
+</html>

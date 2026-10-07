@@ -17,6 +17,7 @@
   "dependencies": {
     "@hive-platform/contracts": "*",
     "@hive-platform/core": "*",
-    "@hive-platform/mfe-runtime": "*"
+    "@hive-platform/mfe-runtime": "*",
+    "@hive-platform/authorization": "*"
   }
 }

@@ -1,19 +1,25 @@
-// Bundles the framework-neutral micro-app into one self-contained ES module, computes its SRI value into the
-// mf-manifest, and bundles the plain-DOM hosts. Output: dist/ (served by any static server or the dev gateway).
+// Bundles each framework-neutral micro-app into one self-contained ES module, writes its mf-manifest with the computed
+// SRI value next to its resource manifest, and bundles the plain-DOM hosts. Output: dist/ (any static server).
 import {build} from 'esbuild';
 import {createHash} from 'node:crypto';
 import {cpSync,mkdirSync,readFileSync,writeFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 
-const root=new URL('.',import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1');
+const root=fileURLToPath(new URL('.',import.meta.url));
 const out=`${root}dist`;
-mkdirSync(`${out}/modules/finance-example`,{recursive:true});
 const common={bundle:true,format:'esm',platform:'browser',target:'es2022',logLevel:'warning',legalComments:'none'};
-await build({...common,entryPoints:[`${root}src/finance-example.ts`],outfile:`${out}/modules/finance-example/entry.js`});
-await build({...common,entryPoints:{'runtime-host':`${root}src/runtime-host.ts`,...(process.env.HIVE_SKIP_WORKSPACE_HOST?{}:{'workspace-host':`${root}src/workspace-host.ts`})},outdir:`${out}/host`,splitting:false});
-const artifact=readFileSync(`${out}/modules/finance-example/entry.js`);
-const manifest=JSON.parse(readFileSync(`${root}manifests/mf-manifest.json`,'utf8'));
-manifest.artifact.integrity='sha384-'+createHash('sha384').update(artifact).digest('base64');
-writeFileSync(`${out}/modules/finance-example/mf-manifest.json`,JSON.stringify(manifest,null,2));
-cpSync(`${root}manifests/resource-manifest.json`,`${out}/modules/finance-example/resource-manifest.json`);
+const modules={
+ 'finance-example':{entry:'src/finance-example.ts',mf:'manifests/finance-mf-manifest.json',resources:'manifests/finance-resource-manifest.json'},
+ 'directory-example':{entry:'src/directory-example.ts',mf:'manifests/directory/mf-manifest.json',resources:'manifests/directory/resource-manifest.json'},
+};
+for(const [key,module] of Object.entries(modules)){
+ const dir=`${out}/modules/${key}`;mkdirSync(dir,{recursive:true});
+ await build({...common,entryPoints:[root+module.entry],outfile:`${dir}/entry.js`});
+ const manifest=JSON.parse(readFileSync(root+module.mf,'utf8'));
+ manifest.artifact.integrity='sha384-'+createHash('sha384').update(readFileSync(`${dir}/entry.js`)).digest('base64');
+ writeFileSync(`${dir}/mf-manifest.json`,JSON.stringify(manifest,null,2));
+ cpSync(root+module.resources,`${dir}/resource-manifest.json`);
+ console.log(`${key}: ${manifest.artifact.integrity}`);
+}
+await build({...common,entryPoints:{'runtime-host':`${root}src/runtime-host.ts`,'workspace-host':`${root}src/workspace-host.ts`},outdir:`${out}/host`});
 cpSync(`${root}public`,out,{recursive:true});
-console.log(`minimal-consumer built: ${manifest.artifact.integrity}`);
