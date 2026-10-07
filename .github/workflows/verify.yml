@@ -21,3 +21,4 @@ jobs:
       - run: npm test
       - run: mvn -B verify
       - run: npm run test:bootstrap
+      - run: npm run test:identity

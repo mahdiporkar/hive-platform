@@ -8,7 +8,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 class SecurityConfiguration {
   @Bean InMemoryUserDetailsManager users() { return new InMemoryUserDetailsManager(); }
   @Bean SecurityFilterChain security(HttpSecurity http) throws Exception {
-    return http.authorizeHttpRequests(auth -> auth
+    return http.requestCache(cache -> cache.requestCache(new org.springframework.security.web.savedrequest.NullRequestCache())).authorizeHttpRequests(auth -> auth
         .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness").permitAll()
         .anyRequest().denyAll())
       .exceptionHandling(errors -> errors.authenticationEntryPoint((request,response,failure) -> response.sendError(401)))
