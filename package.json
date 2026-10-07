@@ -33,7 +33,9 @@
         "test:e2e:console": "node --test tests/e2e/operator-console.test.mjs",
         "test:e2e:api-admin": "node --test tests/e2e/api-only-administration.test.mjs",
         "build:shell": "cd apps/default-shell && node ../../node_modules/vite/bin/vite.js build",
-        "test:e2e:public-hybrid": "node --test tests/e2e/public-hybrid.test.mjs"
+        "test:e2e:public-hybrid": "node --test tests/e2e/public-hybrid.test.mjs",
+        "test:cli": "node --test tests/cli/cli.test.mjs",
+        "test:cli:up": "node --test tests/cli/up.test.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

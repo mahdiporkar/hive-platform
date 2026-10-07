@@ -91,6 +91,11 @@ class ManifestDocumentsTest {
     var badPath = frontend();
     ((ObjectNode) badPath.path("routes").get(0)).put("path", "mod/../x");
     assertThat(code(() -> documents.microFrontendManifest(badPath))).isEqualTo("MANIFEST_INVALID");
+    for (String dotSegment : new String[] {"/mod/../x", "/mod/./x", "/.."}) {
+      var dotted = frontend();
+      ((ObjectNode) dotted.path("routes").get(0)).put("path", dotSegment);
+      assertThat(code(() -> documents.microFrontendManifest(dotted))).as(dotSegment).isEqualTo("MANIFEST_INVALID");
+    }
     var duplicatePath = frontend();
     ((ObjectNode) duplicatePath.path("routes").get(1)).put("path", "/mod");
     assertThat(code(() -> documents.microFrontendManifest(duplicatePath))).isEqualTo("MANIFEST_INVALID");

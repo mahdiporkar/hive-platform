@@ -97,7 +97,7 @@ public final class ManifestDocuments {
       requireObject(route, "route");
       String key = text(route, "key", true), path = text(route, "path", true), access = text(route, "access", true);
       if (!ROUTE_KEY.matcher(key).matches()) throw invalid("Route key " + key + " must match " + ROUTE_KEY.pattern());
-      if (!ROUTE_PATH.matcher(path).matches() || path.length() > 512) throw invalid("Route " + key + " path must be an absolute path of literal, :param segments and an optional trailing /*");
+      if (!ROUTE_PATH.matcher(path).matches() || path.length() > 512 || java.util.Arrays.stream(path.split("/")).anyMatch(segment -> segment.equals(".") || segment.equals(".."))) throw invalid("Route " + key + " path must be an absolute path of literal, :param segments and an optional trailing /*");
       if (!ACCESS.contains(access)) throw invalid("Route " + key + " access must be PUBLIC, HYBRID or AUTHENTICATED");
       if (!keys.add(key)) throw invalid("Duplicate route key " + key);
       if (!paths.add(path)) throw invalid("Duplicate route path " + path);

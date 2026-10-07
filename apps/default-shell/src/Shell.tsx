@@ -95,17 +95,20 @@ function Workspace({engine, context, registry}: {engine: WorkspaceEngine; contex
         </nav>
         <span className="shell-layouts" role="group" aria-label="Layout">
           {LAYOUTS.map(layout => <button key={layout} aria-pressed={workspace.layout === layout} data-layout-button={layout} onClick={() => void engine.setLayout(layout)}>{layout}</button>)}
+          <ExtensionSlot registry={registry} point="WORKSPACE_ACTIONS" />
         </span>
+        <ExtensionSlot registry={registry} point="NOTIFICATIONS" />
         <ExtensionSlot registry={registry} point="HEADER" />
         {context.authenticated
-          ? <span><span data-testid="user">{context.identity.displayName}</span> <button data-testid="sign-out" onClick={async () => {
+          ? <span><ExtensionSlot registry={registry} point="PROFILE" /><span data-testid="user">{context.identity.displayName}</span> <button data-testid="sign-out" onClick={async () => {
               await auth.logout();
               const next = await auth.currentContext();
               window.dispatchEvent(new CustomEvent('hive:context', {detail: next}));
             }}>Sign out</button></span>
-          : <button data-testid="sign-in" onClick={() => auth.login(location.pathname)}>Sign in</button>}
+          : <span><ExtensionSlot registry={registry} point="LOGIN_EXPERIENCE" /><button data-testid="sign-in" onClick={() => auth.login(location.pathname)}>Sign in</button></span>}
       </header>
       <main className="shell-main">
+        <ExtensionSlot registry={registry} point="RUNTIME_ACTIONS" />
         {workspace.layout === 'DASHBOARD' && <ExtensionSlot registry={registry} point="DASHBOARD" />}
         {workspace.layout === 'TABS' && (
           <div className="shell-tabs" role="tablist">

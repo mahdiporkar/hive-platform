@@ -179,6 +179,22 @@ NOT EXECUTED: Next.js specifically (SSR proven with react-dom/server; pattern id
 Open Blockers: none.
 Commit SHA: see git log (Phase 9 commit is ed6e464).
 
+## Phase 11 — SDK, CLI and extension model (COMPLETE)
+
+Implemented: `hive` CLI (version, validate with SRI and cross-checks, doctor with real checks and NOT EXECUTED reporting, up/down with generated secrets and isolated projects, create solution, add mfe, add service, register, upgrade --check); all eight extension points rendered by the default shell; Docker images (`hive/authorization`, `hive/bff` non-root; `hive/default-shell` gateway and `hive/operator-console` nginx with security headers); `infra/docker-compose/hive.yml` with an optional `ui` profile; consumer guide, CLI and extension docs.
+Reused: none.
+Refactored: none.
+Rewritten: CLI (no reference equivalent).
+Dropped: none.
+Deferred: `hive add domain` (business domains belong to solutions); automatic `hive upgrade` (no release channel yet).
+Tests Added: `tests/cli/cli.test.mjs` (4), `tests/cli/up.test.mjs` (1); ManifestDocumentsTest dot-segment cases.
+Tests Executed: npm test; typecheck; mvnw verify (authorization); test:cli; test:cli:up.
+PASS: 45 Node tests; CLI suite; hive up/down with real images.
+FAIL (fixed): route paths with `.`/`..` segments were accepted by both the server and the CLI (security fix, regression test added); a test fixture's duplicate key masked a parent-type check; the gateway served the shell for `/actuator/*` (now 404 except readiness).
+NOT EXECUTED: publishing packages to a registry; Windows-native (non-Docker) service install.
+Open Blockers: none.
+Commit SHA: see git log (Phase 10 commit is 862160b).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

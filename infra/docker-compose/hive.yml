@@ -1,0 +1,109 @@
+# Hive Core (BFF + authorization service + PostgreSQL + OpenFGA + Redis). `hive up` generates .env with local secrets.
+# Optional profile `ui`: default shell gateway (also serves /modules and proxies the console) and operator console.
+# Local/evaluation topology: plain HTTP on 127.0.0.1. Production guidance: docs/deployment.md.
+name: hive
+x-logging: &logging
+  driver: json-file
+  options: {max-size: 10m, max-file: "3"}
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: hive
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: ${HIVE_DB_PASSWORD:?run hive up to generate secrets}
+    volumes: [database:/var/lib/postgresql/data]
+    healthcheck: {test: [CMD-SHELL, pg_isready -U hive -d hive], interval: 3s, timeout: 3s, retries: 40}
+    logging: *logging
+  graph-db:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: hive_graph
+      POSTGRES_USER: hive_graph
+      POSTGRES_PASSWORD: ${HIVE_GRAPH_PASSWORD:?required}
+    volumes: [graph:/var/lib/postgresql/data]
+    healthcheck: {test: [CMD-SHELL, pg_isready -U hive_graph -d hive_graph], interval: 3s, timeout: 3s, retries: 40}
+    logging: *logging
+  graph-migrate:
+    image: openfga/openfga:v1.18.1
+    command: migrate
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://hive_graph:${HIVE_GRAPH_PASSWORD:?required}@graph-db:5432/hive_graph?sslmode=disable
+    depends_on: {graph-db: {condition: service_healthy}}
+  openfga:
+    image: openfga/openfga:v1.18.1
+    command: run
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://hive_graph:${HIVE_GRAPH_PASSWORD:?required}@graph-db:5432/hive_graph?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+    depends_on: {graph-migrate: {condition: service_completed_successfully}}
+    healthcheck: {test: [CMD, /usr/local/bin/grpc_health_probe, -addr=127.0.0.1:8081], interval: 3s, timeout: 3s, retries: 40}
+    logging: *logging
+  redis:
+    image: redis:8.2.1-alpine
+    command: [redis-server, --requirepass, "${HIVE_REDIS_PASSWORD:?required}", --save, ""]
+    environment: {REDISCLI_AUTH: "${HIVE_REDIS_PASSWORD:?required}"}
+    healthcheck: {test: [CMD-SHELL, "redis-cli ping | grep PONG"], interval: 3s, timeout: 3s, retries: 40}
+    logging: *logging
+  authorization:
+    image: hive/authorization:${HIVE_VERSION:-0.1.0-dev}
+    build: {context: ../../services/authorization}
+    environment:
+      HIVE_DB_URL: jdbc:postgresql://postgres:5432/hive
+      HIVE_DB_USER: hive
+      HIVE_DB_PASSWORD: ${HIVE_DB_PASSWORD:?required}
+      HIVE_OPENFGA_URL: http://openfga:8080
+      HIVE_INTERNAL_PASSWORD: ${HIVE_INTERNAL_PASSWORD:?required}
+      HIVE_PROVISIONING_PASSWORD: ${HIVE_PROVISIONING_PASSWORD:-}
+      HIVE_AUTHZ_CACHE_ENABLED: "true"
+      HIVE_REDIS_HOST: redis
+      HIVE_REDIS_PASSWORD: ${HIVE_REDIS_PASSWORD:?required}
+      HIVE_PRIMARY_ISSUER: ${HIVE_OIDC_ISSUER:-}
+      HIVE_IDP_ALLOWED_ORIGINS: ${HIVE_IDP_ALLOWED_ORIGINS:-}
+      HIVE_BOOTSTRAP_ADMIN_SUBJECT: ${HIVE_BOOTSTRAP_ADMIN_SUBJECT:-}
+      HIVE_ARTIFACT_NETWORK_POLICY: ${HIVE_ARTIFACT_NETWORK_POLICY:-PRODUCTION_INTERNET}
+      HIVE_TARGET_NETWORK_POLICY: ${HIVE_TARGET_NETWORK_POLICY:-UNRESTRICTED}
+      HIVE_TARGET_ALLOW_HTTP: ${HIVE_TARGET_ALLOW_HTTP:-false}
+      HIVE_ENVIRONMENT: ${HIVE_ENVIRONMENT:-production}
+    ports: ["127.0.0.1:${HIVE_AUTHORIZATION_PORT:-18082}:8082"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      openfga: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    logging: *logging
+  bff:
+    image: hive/bff:${HIVE_VERSION:-0.1.0-dev}
+    build: {context: ../../services/bff}
+    environment:
+      HIVE_AUTHORIZATION_URL: http://authorization:8082
+      HIVE_CONTROL_ALLOW_HTTP: "true"
+      HIVE_INTERNAL_PASSWORD: ${HIVE_INTERNAL_PASSWORD:?required}
+      HIVE_REDIS_HOST: redis
+      HIVE_REDIS_PASSWORD: ${HIVE_REDIS_PASSWORD:?required}
+      HIVE_VAULT_KEY: ${HIVE_VAULT_KEY:?required}
+      HIVE_IDENTITY_ENABLED: ${HIVE_IDENTITY_ENABLED:-false}
+      HIVE_OIDC_ISSUER: ${HIVE_OIDC_ISSUER:-}
+      HIVE_OIDC_CLIENT_ID: ${HIVE_OIDC_CLIENT_ID:-}
+      HIVE_OIDC_CLIENT_SECRET: ${HIVE_OIDC_CLIENT_SECRET:-}
+      HIVE_PROXY_ALLOWED_ORIGINS: ${HIVE_PROXY_ALLOWED_ORIGINS:-}
+      HIVE_BRANDING_NAME: ${HIVE_BRANDING_NAME:-Hive}
+    ports: ["127.0.0.1:${HIVE_BFF_PORT:-18081}:8081"]
+    depends_on: {authorization: {condition: service_healthy}}
+    logging: *logging
+  operator-console:
+    profiles: [ui]
+    image: hive/operator-console:${HIVE_VERSION:-0.1.0-dev}
+    build: {context: ../.., dockerfile: apps/operator-console/Dockerfile}
+    logging: *logging
+  default-shell:
+    profiles: [ui]
+    image: hive/default-shell:${HIVE_VERSION:-0.1.0-dev}
+    build: {context: ../.., dockerfile: apps/default-shell/Dockerfile}
+    ports: ["127.0.0.1:${HIVE_HTTP_PORT:-8080}:8080"]
+    depends_on: {bff: {condition: service_healthy}, operator-console: {condition: service_started}}
+    logging: *logging
+volumes:
+  database:
+  graph:

@@ -1,0 +1,11 @@
+{
+  "name": "@hive-platform/cli",
+  "version": "0.1.0",
+  "description": "Hive command line: version, validate, doctor, up/down, solution scaffolding and registration.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {"node": ">=22"},
+  "bin": {"hive": "./bin/hive.mjs"},
+  "files": ["bin", "src", "templates"],
+  "dependencies": {"@hive-platform/contracts": "*"}
+}
