@@ -7,4 +7,5 @@
 - Primary OIDC code/PKCE flow, encrypted server vault, token-free Redis session, bounded refresh and CSRF-protected logout.
 - Authorization control plane: resource catalog, users/groups/roles/grants, platform roles, OpenFGA outbox projection, decision API and cache.
 - Manifest governance: module registry, resource and micro-frontend manifests, draft/diff/publish/rollback, immutable revisions, runtime catalog, shared compatibility matrix.
+- Dynamic routing: service targets, proxy routes, route operations, FORWARD_TOKEN and LEGACY authentication, API logs.
 - No production release or completion of the full platform specification is claimed.

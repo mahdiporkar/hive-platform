@@ -37,8 +37,9 @@ public class IdentityConfiguration {
  }
  @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations,IdentityControlClient control) throws Exception {
   var clients=new RequestAuthorizedClients();var contexts=new HttpSessionSecurityContextRepository();
-  return http.securityMatcher("/auth/**","/oauth2/**","/login/oauth2/**","/api/me/**")
-   .authorizeHttpRequests(auth->auth.requestMatchers("/api/me/**").authenticated().anyRequest().permitAll())
+  // One chain for all browser paths when identity is enabled; route-level decisions belong to the runtime proxy.
+  return http.securityMatcher("/auth/**","/oauth2/**","/login/oauth2/**","/api/**")
+   .authorizeHttpRequests(auth->auth.requestMatchers(io.hiveplatform.bff.SecurityConfiguration.ANONYMOUS_CAPABLE).permitAll().requestMatchers(io.hiveplatform.bff.SecurityConfiguration.SESSION_REQUIRED).authenticated().requestMatchers("/auth/**","/oauth2/**","/login/oauth2/**").permitAll().anyRequest().denyAll())
    .requestCache(cache->cache.requestCache(new NullRequestCache()))
    .securityContext(context->context.securityContextRepository(contexts))
    .exceptionHandling(errors->errors.authenticationEntryPoint((request,response,error)->response.sendError(401)))

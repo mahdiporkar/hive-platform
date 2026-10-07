@@ -18,7 +18,6 @@ class IdentityController {
   request.getSession().setAttribute(IdentityConfiguration.RETURN_URL,safe);
   return ResponseEntity.status(302).location(java.net.URI.create("/oauth2/authorization/"+code)).build();
  }
- @GetMapping("/auth/csrf") Map<String,String> csrf(CsrfToken token){return Map.of("headerName",token.getHeaderName(),"token",token.getToken());}
  @GetMapping("/api/me/session") ResponseEntity<?> session(Authentication authentication,HttpServletRequest request){
   if(!(authentication.getPrincipal() instanceof SessionIdentity identity))return ResponseEntity.status(401).build();
   Object handle=request.getSession().getAttribute(IdentityConfiguration.VAULT_HANDLE);

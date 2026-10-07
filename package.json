@@ -21,7 +21,8 @@
         "test:keycloak": "node --test tests/integration/keycloak.test.mjs",
         "test:authorization": "node --test tests/integration/authorization.test.mjs",
         "test:model": "node --test tests/integration/openfga-model.test.mjs",
-        "test:manifests": "node --test tests/integration/manifests.test.mjs"
+        "test:manifests": "node --test tests/integration/manifests.test.mjs",
+        "test:routing": "node --test tests/integration/routing.test.mjs"
     },
     "devDependencies": {
         "playwright": "1.63.0",

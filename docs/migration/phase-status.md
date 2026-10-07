@@ -99,6 +99,22 @@ NOT EXECUTED: fetch over TLS against a real CDN; DNS-failure classification (req
 Open Blockers: none.
 Commit SHA: see git log (Phase 4 commit is d78f47d).
 
+## Phase 6 — Dynamic routing (COMPLETE)
+
+Implemented: service targets, legacy authentication profiles (secret references only), proxy routes and route operations with save-time validation (canonical paths, network policy, ambiguity, per-operation access constraints); runtime resolution API returning a runtime representation with the authorization decision; BFF runtime proxy with exact-origin allowlist and DNS-checked network policy, allowlisted headers both ways, request/response limits, timeouts, no redirects; FORWARD_TOKEN from the server vault; LEGACY token acquisition (4 request formats, JSON pointers), encrypted Redis cache keyed by profile revision, single-flight lease, circuit breaker, invalidation on upstream 401; API log and audit pipeline; admin passthrough `/api/admin/**`; CSRF endpoint for anonymous callers; unified BFF security model with identity-optional operation; firewall/container rejections reported as 400.
+Reused: `RoutePathPolicy` and its tests; exact-origin gateway policy; legacy cache/parser/breaker semantics; file secret resolver semantics.
+Refactored: route resolution into a runtime API; header handling into allowlists; secret resolution confined to the BFF.
+Rewritten: proxy transport (servlet + java.net.http instead of reactive WebClient).
+Dropped: product-specific identity headers and Superset special cases from the generic proxy.
+Deferred: rewrite patterns; retries; API_KEY / OAUTH2_CLIENT_CREDENTIALS / MTLS route modes (explicitly rejected).
+Tests Added: RoutePathPolicyTest (migrated), rewritten BFF security tests (11), `tests/integration/routing.test.mjs`, fixtures `oidc-fixture.mjs` and `upstream-fixture.mjs`; bootstrap now derives migration list and asserts every table empty.
+Tests Executed: mvnw verify; npm test; test:routing; test:bootstrap; test:identity; test:keycloak; test:authorization; test:manifests.
+PASS: 122 Java tests; 25 Node tests; all 7 integration suites.
+FAIL (fixed): anonymous CSRF failures surface as 401 in the identity chain (test accepts 401/403 and asserts no upstream contact); `fetch` normalized encoded traversal client-side (raw HTTP used); container rejections surfaced as 401 via `/error` (now 400); the echo fixture leaked its own received token (fixture corrected). All reran PASS.
+NOT EXECUTED: TLS to upstream targets; DNS-rebinding scenario.
+Open Blockers: none.
+Commit SHA: see git log (Phase 5 commit is 30a6782).
+
 ## Requested release verification matrix
 
 | Check | Result | Evidence / exact limitation |

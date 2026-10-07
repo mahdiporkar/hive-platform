@@ -57,7 +57,7 @@ export async function startStack(t,{suite,base,authorization=true,bff=true,autho
   await ready(stack.urls.authorization+'/actuator/health/readiness',{log:`${logDir}/authorization.log`});
  }
  stack.bffEnv={
-  HIVE_BFF_PORT:String(ports.bff),HIVE_AUTHORIZATION_URL:stack.urls.authorization,HIVE_INTERNAL_PASSWORD:credentials.internal,
+  HIVE_BFF_PORT:String(ports.bff),HIVE_AUTHORIZATION_URL:stack.urls.authorization,HIVE_INTERNAL_PASSWORD:credentials.internal,HIVE_CONTROL_ALLOW_HTTP:'true',
   HIVE_REDIS_HOST:'127.0.0.1',HIVE_REDIS_PORT:String(ports.redis),HIVE_REDIS_PASSWORD:credentials.redis,HIVE_VAULT_KEY:credentials.vault,...bffEnv};
  if(bff){
   stack.bffProcess=stack.java('bff',stack.bffEnv);

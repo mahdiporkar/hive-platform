@@ -23,4 +23,8 @@ jobs:
       - run: npm run test:bootstrap
       - run: npx playwright install --with-deps chromium
       - run: npm run test:identity
+      - run: npm run test:model
+      - run: npm run test:authorization
+      - run: npm run test:manifests
+      - run: npm run test:routing
       - run: npm run test:keycloak

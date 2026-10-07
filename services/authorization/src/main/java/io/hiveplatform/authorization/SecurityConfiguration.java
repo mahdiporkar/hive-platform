@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpStatusRequestRejectedHandler;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
 import org.springframework.security.web.savedrequest.NullRequestCache;
 
 /**
@@ -21,6 +23,9 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
  */
 @Configuration
 class SecurityConfiguration {
+  /** Firewall rejections (encoded traversal, duplicate slashes, backslashes...) are client errors, not authentication failures. */
+  @Bean RequestRejectedHandler requestRejectedHandler() { return new HttpStatusRequestRejectedHandler(); }
+
   @Bean
   InMemoryUserDetailsManager users(@Value("${hive.internal.password:}") String internal, @Value("${hive.provisioning.password:}") String provisioning) {
     var users = new ArrayList<UserDetails>();
@@ -61,7 +66,7 @@ class SecurityConfiguration {
   @Bean
   SecurityFilterChain security(HttpSecurity http) throws Exception {
     return http.authorizeHttpRequests(a -> a
-            .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness").permitAll()
+            .requestMatchers("/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness", "/error").permitAll()
             .anyRequest().denyAll())
         .exceptionHandling(e -> e.authenticationEntryPoint((request, response, failure) -> response.sendError(401)))
         .build();
