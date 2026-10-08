@@ -112,6 +112,9 @@ public class RuntimeProxy {
         body = in.readNBytes(target.maxRequestBytes() + 1);
       }
       if (body.length > target.maxRequestBytes()) throw new HiveException(HttpStatus.PAYLOAD_TOO_LARGE, "REQUEST_TOO_LARGE", "Request body exceeds " + target.maxRequestBytes() + " bytes");
+      // Bodies are opaque here (multipart, forms, JSON, binary). If anything consumed the stream before the proxy,
+      // never forward a truncated body as if it were the client's request.
+      if (request.getContentLengthLong() > body.length) throw new HiveException(HttpStatus.INTERNAL_SERVER_ERROR, "REQUEST_BODY_UNAVAILABLE", "The request body was not available to the proxy");
     }
     URI uri = guard.resolve(target.baseUrl(), route.upstreamPath(), request.getQueryString());
     var builder = HttpRequest.newBuilder(uri).timeout(Duration.ofMillis(target.responseTimeoutMs()));

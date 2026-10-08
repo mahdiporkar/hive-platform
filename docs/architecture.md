@@ -73,6 +73,7 @@ flowchart LR
 | Event bus | [event bus](event-bus.md) |
 | Public / hybrid / private requests | [public, hybrid and authenticated](public-hybrid-authenticated.md) |
 | Superset tunnel | [ADR-011](adr/ADR-011-superset-integration.md) |
+| Opaque request bodies (multipart, forms, JSON, binary) | [ADR-012](adr/ADR-012-opaque-request-bodies.md) |
 | Deployment topology | [deployment](deployment.md) |
 | Control vs runtime plane | [control plane vs runtime plane](control-plane-runtime-plane.md) |
 

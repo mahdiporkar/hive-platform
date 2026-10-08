@@ -26,6 +26,7 @@
         "test:model": "node --test tests/integration/openfga-model.test.mjs",
         "test:manifests": "node --test tests/integration/manifests.test.mjs",
         "test:routing": "node --test tests/integration/routing.test.mjs",
+        "test:multipart": "node --test tests/integration/multipart.test.mjs",
         "build:examples": "node examples/minimal-consumer/build.mjs && node examples/react-tailwind-consumer/build.mjs",
         "test:e2e:mfe": "node --test tests/e2e/mfe-runtime.test.mjs",
         "test:e2e:workspace": "node --test tests/e2e/workspace.test.mjs",
@@ -41,7 +42,8 @@
         "test:log-scan": "node --test tests/security/log-scan.test.mjs",
         "verify:compose": "node tools/verify-compose.mjs",
         "verify:all": "node tools/verify-all.mjs",
-        "test:e2e:golden": "node --test tests/e2e/golden-path.test.mjs"
+        "test:e2e:golden": "node --test tests/e2e/golden-path.test.mjs",
+        "test:e2e:multipart": "node --test tests/e2e/multipart-upload.test.mjs"
     },
     "devDependencies": {
         "esbuild": "0.25.10",

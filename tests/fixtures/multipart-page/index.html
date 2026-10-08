@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Multipart upload through Hive</title>
+</head>
+<body>
+  <!-- Test page for tests/e2e/multipart-upload.test.mjs: a plain browser form that uploads with standard FormData
+       through Hive's runtime route; the browser generates the multipart boundary. -->
+  <form id="upload">
+    <input type="file" id="file" name="file" multiple>
+    <input type="text" id="description" name="description">
+    <input type="text" id="category" name="category">
+    <button type="submit" id="send">Upload</button>
+  </form>
+  <pre id="result"></pre>
+  <script type="module">
+    document.getElementById('upload').addEventListener('submit', async event => {
+      event.preventDefault();
+      const csrf = await (await fetch('/auth/csrf')).json();
+      const data = new FormData();
+      for (const file of document.getElementById('file').files) data.append('file', file);
+      data.append('description', document.getElementById('description').value);
+      data.append('category', document.getElementById('category').value);
+      const response = await fetch('/api/routes/uploads/uploads', { method: 'POST', body: data, headers: { [csrf.headerName]: csrf.token } });
+      document.getElementById('result').textContent = JSON.stringify({ status: response.status, body: await response.json() });
+    });
+  </script>
+</body>
+</html>

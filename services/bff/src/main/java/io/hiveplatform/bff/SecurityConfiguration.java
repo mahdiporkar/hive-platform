@@ -32,6 +32,7 @@ public class SecurityConfiguration {
   @ConditionalOnProperty(name = "hive.identity.enabled", havingValue = "false", matchIfMissing = true)
   SecurityFilterChain anonymousRuntime(HttpSecurity http) throws Exception {
     return http.securityMatcher("/api/**", "/auth/**")
+        .csrf(csrf -> csrf.csrfTokenRequestHandler(new io.hiveplatform.bff.security.RuntimeCsrfTokenRequestHandler()))
         .requestCache(cache -> cache.requestCache(new NullRequestCache()))
         .authorizeHttpRequests(auth -> auth.requestMatchers(ANONYMOUS_CAPABLE).permitAll().requestMatchers(SESSION_REQUIRED).authenticated().anyRequest().denyAll())
         .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, failure) -> response.sendError(401)))

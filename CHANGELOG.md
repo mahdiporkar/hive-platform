@@ -16,4 +16,5 @@
 - Optional Superset integration through an authorized API tunnel with asset grants.
 - Production hardening: fail-closed production profile, forwarded headers, log secrecy scan, branding scan, verification runner.
 - End-to-end acceptance: golden-path scenario against real Keycloak; documentation set with executable link/script checks; forwarded-header pass-through fix in both gateways.
+- Fix: RuntimeProxy forwards standard `multipart/form-data` (and PUT/PATCH/DELETE forms) intact — the BFF no longer parses request bodies before proxying (ADR-012); multipart regression and browser E2E suites.
 - No production release or completion of the full platform specification is claimed.
