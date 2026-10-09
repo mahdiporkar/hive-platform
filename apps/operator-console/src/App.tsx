@@ -1,5 +1,7 @@
+import {PageGuide} from './PageGuide';
+import {LanguagePicker, useI18n} from './i18n';
 import {useEffect, useState} from 'react';
-import {Alert, Button, ConfigProvider, Layout, Menu, Result, Space, Spin, Tag, Typography} from 'antd';
+import {Alert, Button, Layout, Menu, Result, Space, Spin, Tag, Typography} from 'antd';
 import {Navigate, Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import type {HiveContext, PlatformRole} from '@hive-platform/contracts';
 import {errorText, http, loadContext} from './api';
@@ -10,25 +12,26 @@ import {GrantsPage, GroupsPage, IdentityProvidersPage, PlatformRolesPage, RolesP
 
 /** Menu entries with the platform roles that can use them (UI hint; the control plane enforces every call). */
 const SECTIONS: {key: string; label: string; roles: PlatformRole[]}[] = [
-  {key: '/diagnostics', label: 'Diagnostics', roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/applications', label: 'Applications', roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/modules', label: 'Micro apps & manifests', roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/users', label: 'Users', roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/groups', label: 'Groups', roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/roles', label: 'Roles', roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/grants', label: 'Grants', roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/platform-roles', label: 'Platform roles', roles: ['SUPER_ADMIN', 'SECURITY_ADMIN', 'AUDITOR']},
-  {key: '/identity-providers', label: 'Identity providers', roles: ['SECURITY_ADMIN', 'AUDITOR']},
-  {key: '/service-targets', label: 'Service targets', roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
-  {key: '/legacy-auth', label: 'Legacy authentication', roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/routes', label: 'Proxy routes', roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
-  {key: '/superset', label: 'Superset (optional)', roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
-  {key: '/feature-flags', label: 'Feature flags', roles: ['OPERATOR', 'AUDITOR']},
-  {key: '/audit', label: 'Audit log', roles: ['AUDITOR']},
-  {key: '/api-logs', label: 'API logs', roles: ['AUDITOR']},
+  {key: '/diagnostics', label: "Diagnostics", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/applications', label: "Applications", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/modules', label: "Micro apps & manifests", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/users', label: "Users", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/groups', label: "Groups", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/roles', label: "Roles", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/grants', label: "Grants", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/platform-roles', label: "Platform roles", roles: ['SUPER_ADMIN', 'SECURITY_ADMIN', 'AUDITOR']},
+  {key: '/identity-providers', label: "Identity providers", roles: ['SECURITY_ADMIN', 'AUDITOR']},
+  {key: '/service-targets', label: "Service targets", roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
+  {key: '/legacy-auth', label: "Legacy authentication", roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/routes', label: "Proxy routes", roles: ['INTEGRATION_ADMIN', 'OPERATOR', 'AUDITOR']},
+  {key: '/superset', label: "Superset (optional)", roles: ['INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/feature-flags', label: "Feature flags", roles: ['OPERATOR', 'AUDITOR']},
+  {key: '/audit', label: "Audit log", roles: ['AUDITOR']},
+  {key: '/api-logs', label: "API logs", roles: ['AUDITOR']},
 ];
 
 export function App() {
+  const {t} = useI18n();
   const [context, setContext] = useState<HiveContext | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -39,31 +42,33 @@ export function App() {
       setContext(c);
     }).catch(e => setError(errorText(e)));
   }, []);
-  if (error) return <Result status="error" title="Console unavailable" subTitle={error} />;
+  if (error) return <Result status="error" title={t("Console unavailable")} subTitle={error} />;
   if (!context) return <Spin style={{margin: 48}} />;
   const roles = new Set<PlatformRole>(context.platformRoles);
   const isSuper = roles.has('SUPER_ADMIN');
   const sections = SECTIONS.filter(s => isSuper || s.roles.some(r => roles.has(r)));
-  if (sections.length === 0) return <div data-testid="no-platform-role"><Result status="403" title="No platform role"
-    subTitle="Operator Console requires a platform role (operator, security, integration administrator or auditor). Business roles do not grant console access." /></div>;
+  if (sections.length === 0) return <div data-testid="no-platform-role"><Result status="403" title={t("No platform role")}
+    subTitle={t("Operator Console requires a platform role (operator, security, integration administrator or auditor). Business roles do not grant console access.")} /></div>;
   return (
-    <ConfigProvider theme={{token: {borderRadius: 6}}}>
+    <>
       <Layout style={{minHeight: '100vh'}}>
-        <Layout.Header style={{display: 'flex', alignItems: 'center', gap: 16}}>
-          <Typography.Title level={4} style={{color: '#fff', margin: 0}}>Hive Operator Console</Typography.Title>
-          <Space style={{marginLeft: 'auto'}}>
-            {[...roles].map(r => <Tag key={r} color="purple" data-testid={`role-${r}`}>{r}</Tag>)}
+        <Layout.Header style={{display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', height: 'auto', minHeight: 64, paddingBlock: 12}}>
+          <Typography.Title level={4} style={{color: '#fff', margin: 0}}>{t("Hive Operator Console")}</Typography.Title>
+          <Space wrap style={{marginInlineStart: 'auto'}}>
+            <LanguagePicker />
+            {[...roles].map(r => <Tag key={r} color="purple" data-testid={`role-${r}`}>{t(r)}</Tag>)}
             <Typography.Text style={{color: '#fff'}} data-testid="operator-name">{context.identity.displayName}</Typography.Text>
-            <Button size="small" data-testid="logout" onClick={async () => { await http.post('/auth/logout'); window.location.assign('/'); }}>Sign out</Button>
+            <Button size="small" data-testid="logout" onClick={async () => { await http.post('/auth/logout'); window.location.assign('/'); }}>{t("Sign out")}</Button>
           </Space>
         </Layout.Header>
         <Layout>
           <Layout.Sider width={230} theme="light">
-            <Menu mode="inline" selectedKeys={['/' + location.pathname.split('/')[1]]} items={sections.map(s => ({key: s.key, label: <span data-testid={`nav-${s.key.slice(1)}`}>{s.label}</span>}))}
+            <Menu mode="inline" selectedKeys={['/' + location.pathname.split('/')[1]]} items={sections.map(s => ({key: s.key, label: <span data-testid={`nav-${s.key.slice(1)}`}>{t(s.label)}</span>}))}
               onClick={({key}) => navigate(key)} />
           </Layout.Sider>
           <Layout.Content style={{padding: 24}}>
-            <Alert type="info" showIcon style={{marginBottom: 16}} message="Platform administration only. Business administration belongs to solutions." />
+            <Alert type="info" showIcon style={{marginBottom: 16}} message={t("Platform administration only. Business administration belongs to solutions.")} />
+            <PageGuide />
             <Routes>
               <Route path="/" element={<Navigate to={sections[0]!.key} replace />} />
               <Route path="/diagnostics" element={<DiagnosticsPage />} />
@@ -84,11 +89,11 @@ export function App() {
               <Route path="/feature-flags" element={<FlagsPage />} />
               <Route path="/audit" element={<AuditPage />} />
               <Route path="/api-logs" element={<ApiLogsPage />} />
-              <Route path="*" element={<Result status="404" title="Not found" />} />
+              <Route path="*" element={<Result status="404" title={t("Not found")} />} />
             </Routes>
           </Layout.Content>
         </Layout>
       </Layout>
-    </ConfigProvider>
+    </>
   );
 }

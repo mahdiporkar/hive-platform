@@ -1,6 +1,9 @@
 import {useCallback, useEffect, useState} from 'react';
 import {createHttpClient, HiveHttpError} from '@hive-platform/http-client';
 import type {HiveContext} from '@hive-platform/contracts';
+import {translate, type Language} from './i18n';
+
+const valid = (value: string): value is Language => value === 'en' || value === 'fa' || value === 'ar';
 
 /** The console is a plain administrative API client: same-origin session, CSRF, PlatformError. */
 export const http = createHttpClient();
@@ -11,8 +14,11 @@ export const admin = {
   delete: <T,>(path: string) => http.delete<T>(`/api/admin${path}`),
 };
 
+/** A failed call in the console language; the platform's code and detail stay as returned, for support. */
 export function errorText(error: unknown): string {
-  if (error instanceof HiveHttpError) return `${error.code}: ${error.error.message}`;
+  const lang = document.documentElement.lang;
+  // English keeps the platform form (CODE: detail); other languages lead with a sentence in that language.
+  if (error instanceof HiveHttpError) return `${valid(lang) && lang !== 'en' ? translate('Request failed', lang) + ' — ' : ''}${error.code}: ${error.error.message}`;
   return error instanceof Error ? error.message : String(error);
 }
 

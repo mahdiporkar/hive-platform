@@ -1,3 +1,4 @@
+import {LocaleProvider} from './i18n';
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import {BrowserRouter} from 'react-router-dom';
@@ -6,7 +7,7 @@ import {App} from './App';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename="/console">
-      <App />
+      <LocaleProvider><App /></LocaleProvider>
     </BrowserRouter>
   </StrictMode>,
 );

@@ -16,6 +16,14 @@ Menu visibility follows platform roles (UI hint only). Users without any platfor
 
 Build: `npm run build:console` (Vite, output `apps/operator-console/dist`). Deployments serve it as static files under `/console/` on the same origin as the BFF.
 
+## Languages and page guides
+
+The header language picker supports English, Persian and Arabic. Persian and Arabic use right-to-left layout, including Ant Design dialogs, tables and pagination. The choice is saved in this browser under `hive.console.language`, separately from a solution's language preference. Initial language follows the browser when supported, otherwise English.
+
+Each console page includes an expandable **Page guide** with three steps in the selected language. Application resource trees and module details have their own guides. Interface translations live in `apps/operator-console/src/messages.json`; route-specific guides live in `guides.json`. Keep all three guide languages aligned when adding a route. Resource keys, API paths, user-supplied names and raw diagnostic records retain their original values.
+
+Status and type codes shown by the console (platform roles, access modes, route authentication, manifest states and diff changes, audit and API-log outcomes, resource types, integration health) are labelled in the selected language; HTTP methods and wire formats stay as protocol identifiers. Failed calls keep the platform form `CODE: detail` for support, and in Persian and Arabic are introduced by a sentence in that language.
+
 ## Executed evidence
 
 - `npm run test:e2e:console` (Edge): the bootstrapped super administrator signs in; creates an application; registers a module; imports a resource manifest, reviews the diff, publishes; registers and activates an artifact; sees an incompatible manifest rejected with `VERSION_MAJOR_UNSUPPORTED: contractVersion: supported major 1, received 2`; inspects the resource tree; creates a user with an identity binding, a role, a role assignment, a grant and a platform role; creates a service target, a forward-token route and a protected operation and previews resolution; creates and toggles a feature flag; checks diagnostics; reads audit and API logs. The test then verifies through the API that every action was audited with the operator as actor and that the console-made role assignment and grant are effective for authorization. A user without a platform role sees "No platform role" and gets 403 from the admin API.

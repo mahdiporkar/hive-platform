@@ -1,0 +1,308 @@
+{
+  "diagnostics": {
+    "en": [
+      "Check graph connectivity and the runtime catalog revision.",
+      "Compare active module versions with the expected release.",
+      "After correcting a service or configuration problem, use Refresh to check again."
+    ],
+    "fa": [
+      "وضعیت اتصال گراف و بازبینی کاتالوگ اجرا را بررسی کنید.",
+      "نسخهٔ ماژول‌های فعال را با نسخهٔ مورد انتظار مقایسه کنید.",
+      "پس از رفع مشکل سرویس یا تنظیمات، «تازه‌سازی» را بزنید."
+    ],
+    "ar": [
+      "تحقق من اتصال الرسم البياني ومراجعة كتالوج التشغيل.",
+      "قارن إصدارات الوحدات النشطة بالإصدار المتوقع.",
+      "بعد إصلاح الخدمة أو الإعدادات، اضغط «تحديث» للتحقق مجدداً."
+    ]
+  },
+  "applications": {
+    "en": [
+      "Create an application with a stable unique key and a readable display name.",
+      "Select its key to inspect the resource tree.",
+      "Register modules under that application before granting access to their resources."
+    ],
+    "fa": [
+      "برنامه را با کلید یکتای ثابت و نام نمایشی خوانا ایجاد کنید.",
+      "برای مشاهدهٔ درخت منابع، کلید برنامه را انتخاب کنید.",
+      "ماژول‌ها را زیر برنامه ثبت کنید و سپس مجوز منابع آن‌ها را بدهید."
+    ],
+    "ar": [
+      "أنشئ تطبيقاً بمفتاح فريد ثابت واسم عرض واضح.",
+      "اختر مفتاحه لعرض شجرة الموارد.",
+      "سجّل الوحدات ضمن التطبيق قبل منح صلاحيات مواردها."
+    ]
+  },
+  "application-detail": {
+    "en": [
+      "Expand the tree to see modules, pages, API resources and their actions.",
+      "For a manual resource, choose New resource and enter its type, parent key and action keys.",
+      "For resources owned by a manifest, update and publish the module’s resource manifest."
+    ],
+    "fa": [
+      "شاخه‌های درخت را باز کنید تا ماژول‌ها، صفحات، منابع API و عملیات آن‌ها را ببینید.",
+      "برای منبع دستی، «منبع جدید» را بزنید و نوع، کلید والد و کلید عملیات را وارد کنید.",
+      "منابع متعلق به مانیفست را از طریق اصلاح و انتشار مانیفست منابع ماژول مدیریت کنید."
+    ],
+    "ar": [
+      "وسّع الشجرة لرؤية الوحدات والصفحات وموارد API وإجراءاتها.",
+      "لإنشاء مورد يدوي، اختر «مورد جديد» وأدخل النوع ومفتاح الأصل ومفاتيح الإجراءات.",
+      "عدّل الموارد التابعة لملف تعريف عبر تحديث ونشر ملف تعريف موارد الوحدة."
+    ]
+  },
+  "modules": {
+    "en": [
+      "Choose Register module and enter the owning application, unique module key and display name.",
+      "Choose MANIFEST for manifest-managed definitions, MANUAL for manual definitions, or HYBRID for mixed definitions.",
+      "Open a registered module to import, review and activate its manifests."
+    ],
+    "fa": [
+      "«ثبت میکرو» را انتخاب و برنامهٔ مالک، کلید یکتای ماژول و نام نمایشی را وارد کنید.",
+      "برای مدیریت با مانیفست، حالت MANIFEST؛ برای تعریف دستی، MANUAL؛ و برای ترکیب آن‌ها، HYBRID را انتخاب کنید.",
+      "ماژول ثبت‌شده را باز کنید تا مانیفست‌های آن را وارد، بررسی و فعال کنید."
+    ],
+    "ar": [
+      "اختر «تسجيل وحدة» وأدخل التطبيق المالك ومفتاح الوحدة الفريد واسم العرض.",
+      "اختر MANIFEST للتعريف بالملفات، أو MANUAL للتعريف اليدوي، أو HYBRID للجمع بينهما.",
+      "افتح الوحدة المسجلة لاستيراد ملفات تعريفها ومراجعتها وتفعيلها."
+    ]
+  },
+  "module-detail": {
+    "en": [
+      "In Resource manifests, paste JSON or fetch the registered URL, then inspect Diff before Publish.",
+      "In Artifacts, import the micro-frontend manifest and activate the intended version; its referenced resource revision is activated too.",
+      "Review Release history. To roll back resources, activate a previous published resource version."
+    ],
+    "fa": [
+      "در «مانیفست‌های منابع»، JSON را وارد یا از نشانی ثبت‌شده دریافت کنید؛ پیش از انتشار، تغییرات را مقایسه کنید.",
+      "در «بسته‌های اجرایی»، مانیفست میکرو را وارد و نسخهٔ موردنظر را فعال کنید؛ نسخهٔ منابع ارجاع‌شده نیز فعال می‌شود.",
+      "تاریخچهٔ انتشار را بررسی کنید. برای بازگشت منابع، نسخهٔ منتشرشدهٔ قبلی را فعال کنید."
+    ],
+    "ar": [
+      "في «ملفات تعريف الموارد»، ألصق JSON أو اجلب الرابط المسجل ثم راجع المقارنة قبل النشر.",
+      "في «الحزم التنفيذية»، استورد ملف تعريف الواجهة وفعّل الإصدار المطلوب؛ يُفعّل إصدار الموارد المشار إليه أيضاً.",
+      "راجع سجل الإصدارات. لاسترجاع الموارد، فعّل إصدار موارد منشوراً سابقاً."
+    ]
+  },
+  "users": {
+    "en": [
+      "Create a user with a display name and tenant.",
+      "Link an external login by entering its exact issuer and subject; this form does not create an identity-provider password.",
+      "Use Activate or Deactivate to control whether the user can access the platform."
+    ],
+    "fa": [
+      "کاربر را با نام نمایشی و مستأجر ایجاد کنید.",
+      "برای اتصال ورود خارجی، صادرکننده و شناسهٔ دقیق هویت را وارد کنید؛ این فرم رمز ارائه‌دهندهٔ هویت را ایجاد نمی‌کند.",
+      "با فعال‌سازی یا غیرفعال‌سازی، دسترسی کاربر به پلتفرم را کنترل کنید."
+    ],
+    "ar": [
+      "أنشئ المستخدم باسم عرض ومستأجر.",
+      "اربط الدخول الخارجي بإدخال جهة الإصدار ومعرّف الهوية بدقة؛ هذا النموذج لا ينشئ كلمة مرور لدى موفر الهوية.",
+      "استخدم التفعيل أو التعطيل للتحكم بوصول المستخدم إلى المنصة."
+    ]
+  },
+  "groups": {
+    "en": [
+      "Create an access group with a unique key.",
+      "Choose Add member and enter an existing user id.",
+      "Assign roles or permissions to group:<key> so members share access."
+    ],
+    "fa": [
+      "گروه دسترسی را با کلید یکتا ایجاد کنید.",
+      "«افزودن عضو» را بزنید و شناسهٔ کاربر موجود را وارد کنید.",
+      "نقش یا مجوز را به group:<key> بدهید تا اعضا دسترسی مشترک داشته باشند."
+    ],
+    "ar": [
+      "أنشئ مجموعة وصول بمفتاح فريد.",
+      "اختر «إضافة عضو» وأدخل معرّف مستخدم موجود.",
+      "أسند الأدوار أو الصلاحيات إلى group:<key> ليشترك الأعضاء في الوصول."
+    ]
+  },
+  "roles": {
+    "en": [
+      "Create a business role with a unique key and description.",
+      "Assign it to user:<id> or group:<key>, then grant resource actions to role:<key>.",
+      "Archiving a role revokes its assignments and grants; review the confirmation before proceeding."
+    ],
+    "fa": [
+      "نقش کسب‌وکار را با کلید یکتا و توضیح ایجاد کنید.",
+      "آن را به user:<id> یا group:<key> تخصیص دهید و مجوز عملیات منابع را به role:<key> بدهید.",
+      "بایگانی نقش، تخصیص‌ها و مجوزهای آن را لغو می‌کند؛ پیام تأیید را بررسی کنید."
+    ],
+    "ar": [
+      "أنشئ دور أعمال بمفتاح فريد ووصف.",
+      "أسنده إلى user:<id> أو group:<key> ثم امنح إجراءات الموارد إلى role:<key>.",
+      "أرشفة الدور تلغي إسناداته وصلاحياته؛ راجع التأكيد قبل المتابعة."
+    ]
+  },
+  "grants": {
+    "en": [
+      "Choose Grant permission and specify a user, role or group subject.",
+      "Enter an existing application key, resource key and action key from the resource tree.",
+      "Use Revoke to remove a grant that is no longer needed."
+    ],
+    "fa": [
+      "«اعطای مجوز» را بزنید و کاربر، نقش یا گروه ذی‌نفع را مشخص کنید.",
+      "کلید برنامه، کلید منبع و کلید عملیات موجود را از درخت منابع وارد کنید.",
+      "برای حذف مجوزی که دیگر لازم نیست، «لغو» را بزنید."
+    ],
+    "ar": [
+      "اختر «منح صلاحية» وحدد المستخدم أو الدور أو المجموعة المستفيدة.",
+      "أدخل مفتاح تطبيق ومورد وإجراء موجود من شجرة الموارد.",
+      "استخدم «إلغاء» لإزالة الصلاحية التي لم تعد مطلوبة."
+    ]
+  },
+  "platform-roles": {
+    "en": [
+      "Platform roles control this console, independently of ERP business roles.",
+      "Assign the narrowest suitable role to the intended subject.",
+      "Use Revoke to remove platform access; avoid removing your only administrative access."
+    ],
+    "fa": [
+      "نقش‌های پلتفرم دسترسی این کنسول را مستقل از نقش‌های ERP کنترل می‌کنند.",
+      "محدودترین نقش مناسب را به ذی‌نفع موردنظر تخصیص دهید.",
+      "با «لغو» دسترسی راهبری را حذف کنید؛ تنها دسترسی مدیریتی خود را حذف نکنید."
+    ],
+    "ar": [
+      "أدوار المنصة تتحكم في هذه الوحدة بشكل مستقل عن أدوار ERP.",
+      "أسند أقل دور مناسب للمستفيد المقصود.",
+      "استخدم «إلغاء» لسحب وصول المنصة؛ لا تُلغِ وسيلتك الوحيدة للإدارة."
+    ]
+  },
+  "identity-providers": {
+    "en": [
+      "Register the issuer, client id and OIDC endpoints from your identity provider.",
+      "Enter a secret reference, not the secret itself; configure the corresponding environment secret separately.",
+      "Check tenant and domain routing before enabling the provider and testing sign-in."
+    ],
+    "fa": [
+      "صادرکننده، شناسهٔ کلاینت و نشانی‌های OIDC ارائه‌دهندهٔ هویت را ثبت کنید.",
+      "ارجاع به راز را وارد کنید، نه خود راز؛ مقدار راز را جداگانه در محیط تنظیم کنید.",
+      "پیش از فعال‌سازی و آزمایش ورود، مستأجر و مسیریابی دامنه‌ها را بررسی کنید."
+    ],
+    "ar": [
+      "سجّل جهة الإصدار ومعرّف العميل ونقاط OIDC من موفر الهوية.",
+      "أدخل مرجع السر وليس السر نفسه؛ اضبط السر المقابل في البيئة بشكل منفصل.",
+      "تحقق من المستأجر وتوجيه النطاقات قبل تفعيل الموفر واختبار الدخول."
+    ]
+  },
+  "service-targets": {
+    "en": [
+      "Create a target for the backend service’s base URL.",
+      "Set connection and response timeouts and request/response size limits.",
+      "Use the target key when creating a proxy route."
+    ],
+    "fa": [
+      "برای نشانی پایهٔ سرویس بک‌اند یک مقصد ایجاد کنید.",
+      "مهلت اتصال و پاسخ و محدودیت حجم درخواست و پاسخ را تنظیم کنید.",
+      "هنگام ایجاد مسیر واسط، کلید همین مقصد را وارد کنید."
+    ],
+    "ar": [
+      "أنشئ هدفاً للرابط الأساسي لخدمة الخلفية.",
+      "اضبط مهل الاتصال والاستجابة وحدود حجم الطلب والاستجابة.",
+      "استخدم مفتاح الهدف عند إنشاء مسار وكيل."
+    ]
+  },
+  "legacy-auth": {
+    "en": [
+      "Create a profile for a service that needs its own token exchange.",
+      "Specify the target, token endpoint, request format and credential reference.",
+      "Set token and expiry JSON pointers, then reference this profile from a LEGACY proxy route."
+    ],
+    "fa": [
+      "برای سرویسی که تبادل توکن اختصاصی دارد، پروفایل بسازید.",
+      "مقصد، نشانی توکن، قالب درخواست و ارجاع اعتبارنامه را مشخص کنید.",
+      "مسیرهای JSON توکن و انقضا را تنظیم و این پروفایل را در مسیر واسط LEGACY استفاده کنید."
+    ],
+    "ar": [
+      "أنشئ ملفاً لخدمة تحتاج إلى تبادل رموز خاص بها.",
+      "حدد الهدف ونقطة الرمز وصيغة الطلب ومرجع بيانات الاعتماد.",
+      "اضبط مؤشرات JSON للرمز والانتهاء ثم اربط الملف بمسار وكيل من نوع LEGACY."
+    ]
+  },
+  "routes": {
+    "en": [
+      "Register a path prefix, backend target and authentication mode.",
+      "Open Operations to define HTTP methods, path patterns, access mode and required resource actions.",
+      "Use Preview with a method and path to inspect routing before calling the backend."
+    ],
+    "fa": [
+      "پیشوند مسیر، سرویس مقصد و روش احراز هویت را ثبت کنید.",
+      "«عملیات» را باز کنید و متد HTTP، الگوی مسیر، نوع دسترسی و مجوز موردنیاز را تعریف کنید.",
+      "برای بررسی مسیریابی پیش از فراخوانی بک‌اند، متد و مسیر را در «پیش‌نمایش» وارد کنید."
+    ],
+    "ar": [
+      "سجّل بادئة المسار والهدف الخلفي ووضع المصادقة.",
+      "افتح «الإجراءات» لتعريف طرق HTTP وأنماط المسارات والوصول وصلاحيات الموارد المطلوبة.",
+      "استخدم «معاينة» مع الطريقة والمسار لفحص التوجيه قبل استدعاء الخلفية."
+    ]
+  },
+  "superset": {
+    "en": [
+      "Register the Superset base URL, owning application and service-account reference.",
+      "Register a dashboard or chart using DASHBOARD:id or CHART:id.",
+      "Inspect health and disable an integration when it should no longer be available."
+    ],
+    "fa": [
+      "نشانی پایهٔ سوپرست، برنامهٔ مالک و ارجاع حساب سرویس را ثبت کنید.",
+      "داشبورد یا نمودار را با قالب DASHBOARD:id یا CHART:id ثبت کنید.",
+      "سلامت اتصال را بررسی و در صورت عدم نیاز، اتصال را غیرفعال کنید."
+    ],
+    "ar": [
+      "سجّل رابط سوبرست الأساسي والتطبيق المالك ومرجع حساب الخدمة.",
+      "سجّل لوحة أو مخططاً بصيغة DASHBOARD:id أو CHART:id.",
+      "افحص السلامة وعطّل التكامل عندما لا يعود مطلوباً."
+    ]
+  },
+  "feature-flags": {
+    "en": [
+      "Create a feature key with a clear description.",
+      "Choose exposure and environments; an empty environment list applies to all environments.",
+      "Toggle the flag and verify the consuming application’s behavior."
+    ],
+    "fa": [
+      "کلید قابلیت را با توضیح روشن ایجاد کنید.",
+      "سطح نمایش و محیط‌ها را انتخاب کنید؛ فهرست خالی یعنی همهٔ محیط‌ها.",
+      "وضعیت کلید را تغییر دهید و رفتار برنامهٔ مصرف‌کننده را بررسی کنید."
+    ],
+    "ar": [
+      "أنشئ مفتاح ميزة بوصف واضح.",
+      "اختر نطاق الإظهار والبيئات؛ القائمة الفارغة تشمل جميع البيئات.",
+      "بدّل المفتاح وتحقق من سلوك التطبيق المستهلك."
+    ]
+  },
+  "audit": {
+    "en": [
+      "Search by event-type prefix to narrow the audit history.",
+      "Inspect the actor, time, outcome and details of each administrative event.",
+      "Use the correlation id to connect related events and request logs."
+    ],
+    "fa": [
+      "با پیشوند نوع رویداد، تاریخچهٔ حسابرسی را محدود کنید.",
+      "عامل، زمان، نتیجه و جزئیات هر رویداد مدیریتی را بررسی کنید.",
+      "برای ارتباط دادن رویدادها و گزارش درخواست‌ها از شناسهٔ همبستگی استفاده کنید."
+    ],
+    "ar": [
+      "ابحث ببادئة نوع الحدث لتصفية سجل التدقيق.",
+      "راجع المنفذ والوقت والنتيجة وتفاصيل كل حدث إداري.",
+      "استخدم معرّف الترابط لربط الأحداث وسجلات الطلبات ذات الصلة."
+    ]
+  },
+  "api-logs": {
+    "en": [
+      "Filter by route key to inspect calls to a service.",
+      "Compare HTTP status, outcome and duration to identify failures or slow calls.",
+      "Match the route and operation keys to their proxy configuration before changing settings."
+    ],
+    "fa": [
+      "با کلید مسیر، فراخوانی‌های سرویس را فیلتر کنید.",
+      "کد وضعیت HTTP، نتیجه و مدت اجرا را برای یافتن خطا یا کندی مقایسه کنید.",
+      "پیش از تغییر تنظیمات، کلید مسیر و عملیات را با تنظیمات مسیر واسط تطبیق دهید."
+    ],
+    "ar": [
+      "صفِّ حسب مفتاح المسار لفحص استدعاءات الخدمة.",
+      "قارن حالة HTTP والنتيجة والمدة لتحديد الإخفاقات أو البطء.",
+      "طابق مفاتيح المسار والإجراء مع إعدادات الوكيل قبل تعديلها."
+    ]
+  }
+}
