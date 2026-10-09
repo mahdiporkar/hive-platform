@@ -1,0 +1,24 @@
+{
+  "$comment": "Deployable Hive components, in deployment order (the control plane before the BFF that calls it). image: registry repository under IMAGE_PREFIX; app: default CapRover app name (override with CAPROVER_APP_<NAME>, token CAPROVER_TOKEN_<NAME>); paths: files whose change requires redeploying the component (both services embed the shared starter and ui-artifact-security); smoke: smoke.mjs options that receive the component's commit.",
+  "components": [
+    {
+      "name": "authorization",
+      "image": "hive-authorization",
+      "app": "hive-authorization",
+      "paths": ["services/authorization/", "services/ui-artifact-security/", "starters/", "pom.xml", ".mvn/", "mvnw"]
+    },
+    {
+      "name": "bff",
+      "image": "hive-bff",
+      "app": "hive-bff",
+      "paths": ["services/bff/", "services/ui-artifact-security/", "starters/", "pom.xml", ".mvn/", "mvnw"]
+    },
+    {
+      "name": "console",
+      "image": "hive-operator-console",
+      "app": "hive-operator-console",
+      "paths": ["apps/operator-console/", "packages/", "package.json", "package-lock.json", "infra/nginx/console.conf.template"],
+      "smoke": {"commit": "--console-commit"}
+    }
+  ]
+}

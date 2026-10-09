@@ -1,17 +1,44 @@
+# Hive's full verification: contracts, services, integration, end-to-end, compose and architecture tests.
+# Runs on pull requests and on pushes to any branch except develop; on develop the demo pipeline (deploy-demo.yml)
+# calls it before building and deploying, so a failing test blocks the deployment.
 name: Verify
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches-ignore: [develop]
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Commit to verify (default: the triggering commit)'
+        type: string
+        default: ''
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.workflow }}-${{ inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  migrations:
+    name: Migration guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with: {ref: "${{ inputs.ref || github.sha }}", fetch-depth: 0}
+      - uses: actions/setup-node@v7
+        with: {node-version: 22}
+      - name: Applied migrations are append-only and backward compatible
+        run: node deploy/check-migrations.mjs "${{ github.event.pull_request.base.sha || github.event.before || '' }}"
+
   contracts-and-services:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+        with: {ref: "${{ inputs.ref || github.sha }}"}
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21

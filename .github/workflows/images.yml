@@ -1,0 +1,88 @@
+# Builds and pushes the Docker images of the given Hive components for one commit, tagged with the full commit SHA:
+#   ghcr.io/<owner>/hive-platform/hive-authorization:<sha>, …/hive-bff:<sha>, …/hive-operator-console:<sha>
+# An image that already exists for the commit is not rebuilt (redeploys and rollbacks reuse it).
+name: Images
+on:
+  workflow_call:
+    inputs:
+      sha: {type: string, required: true, description: Full commit SHA}
+      components: {type: string, required: true, description: 'Comma-separated: authorization,bff,console (empty: nothing to build)'}
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  images:
+    name: Build and push images
+    if: inputs.components != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with: {ref: "${{ inputs.sha }}"}
+      - id: prefix
+        run: echo "value=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with: {registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}"}
+      - id: need
+        name: Images not yet in the registry
+        env: {PREFIX: "${{ steps.prefix.outputs.value }}", COMPONENTS: "${{ inputs.components }}", SHA: "${{ inputs.sha }}"}
+        run: |
+          declare -A image=([authorization]=hive-authorization [bff]=hive-bff [console]=hive-operator-console)
+          java=false
+          for component in authorization bff console; do
+            build=false
+            if [[ ",$COMPONENTS," == *",$component,"* ]]; then
+              if docker buildx imagetools inspect "$PREFIX/${image[$component]}:$SHA" >/dev/null 2>&1; then
+                echo "${image[$component]}:$SHA already exists — reused"
+              else
+                build=true
+                if [ "$component" != console ]; then java=true; fi
+              fi
+            fi
+            echo "$component=$build" >> "$GITHUB_OUTPUT"
+          done
+          echo "java=$java" >> "$GITHUB_OUTPUT"
+
+      - if: steps.need.outputs.java == 'true'
+        uses: actions/setup-java@v6
+        with: {distribution: temurin, java-version: 21, cache: maven}
+      - if: steps.need.outputs.java == 'true'
+        name: Service jars (tested by Verify)
+        run: ./mvnw -B -q package -DskipTests
+      - if: steps.need.outputs.authorization == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: services/authorization
+          push: true
+          tags: ${{ steps.prefix.outputs.value }}/hive-authorization:${{ inputs.sha }}
+          build-args: HIVE_BUILD_COMMIT=${{ inputs.sha }}
+      - if: steps.need.outputs.bff == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: services/bff
+          push: true
+          tags: ${{ steps.prefix.outputs.value }}/hive-bff:${{ inputs.sha }}
+          build-args: HIVE_BUILD_COMMIT=${{ inputs.sha }}
+
+      - if: steps.need.outputs.console == 'true'
+        uses: actions/setup-node@v7
+        with: {node-version: 22, cache: npm}
+      - if: steps.need.outputs.console == 'true'
+        name: Operator console
+        run: npm ci --no-audit --no-fund && npm run build && npm run build:console
+      - if: steps.need.outputs.console == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/operator-console/Dockerfile
+          push: true
+          tags: ${{ steps.prefix.outputs.value }}/hive-operator-console:${{ inputs.sha }}
+          build-args: HIVE_BUILD_COMMIT=${{ inputs.sha }}
+      - name: Summary
+        run: |
+          {
+            echo "### Images for ${{ inputs.sha }}"
+            for c in $(echo "${{ inputs.components }}" | tr ',' ' '); do echo "- $c"; done
+          } >> "$GITHUB_STEP_SUMMARY"

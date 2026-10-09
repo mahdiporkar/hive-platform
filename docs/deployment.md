@@ -53,3 +53,7 @@ Supply via environment or secret store, never in images or the repository: datab
 - Graceful shutdown (20 s), non-root images, JSON-file log rotation in the compose file.
 - `hive doctor` checks a running installation end to end.
 - Multiple instances: sessions, vault, refresh leases and legacy-token single flight are coordinated in Redis; the graph outbox uses database claims; store creation uses an advisory lock. Multi-instance load testing was not executed.
+
+## Demo pipeline
+
+The CI/CD pipeline that deploys Hive to the demo CapRover server on every push to `develop` is described in [Demo deployment](demo-deployment.md).

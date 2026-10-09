@@ -1,0 +1,57 @@
+# Zero-touch demo deployment of Hive: every push to develop is verified (verify.yml), the components that differ from the version
+# verified on the demo are built and pushed (images.yml) and deployed to CapRover with health checks, smoke tests and
+# automatic rollback (deploy-caprover.yml). Pushes to platform-v1 or main never deploy.
+name: Deploy demo
+on:
+  push:
+    branches: [develop]
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  # Pipelines for develop run one after another; a newer push waiting in the queue supersedes an older waiting one,
+  # and because components are compared with what is verified on the demo, nothing from the superseded push is lost.
+  group: deploy-demo-hive-platform
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: Verify
+    uses: ./.github/workflows/verify.yml
+    with: {ref: "${{ github.sha }}"}
+
+  changes:
+    name: Components to deploy
+    needs: ci
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.affected.outputs.components }}
+    steps:
+      - uses: actions/checkout@v7
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v7
+        with: {node-version: 22}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with: {registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}"}
+      - id: affected
+        env: {IMAGE_PREFIX: "ghcr.io/${{ github.repository }}"}
+        run: |
+          export IMAGE_PREFIX="${IMAGE_PREFIX,,}"
+          # Without a configured demo every push builds every image (nothing is verified there to compare with).
+          components=$(node deploy/affected.mjs "$GITHUB_SHA" affected)
+          echo "components=$components" >> "$GITHUB_OUTPUT"
+          echo "### Components to deploy: ${components:-none}" >> "$GITHUB_STEP_SUMMARY"
+
+  images:
+    name: Images
+    needs: changes
+    uses: ./.github/workflows/images.yml
+    with: {sha: "${{ github.sha }}", components: "${{ needs.changes.outputs.components }}"}
+
+  deploy:
+    name: Demo
+    needs: [changes, images]
+    uses: ./.github/workflows/deploy-caprover.yml
+    with: {sha: "${{ github.sha }}", components: "${{ needs.changes.outputs.components }}", reason: "push to develop"}
+    secrets: inherit

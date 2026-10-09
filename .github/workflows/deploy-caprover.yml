@@ -1,0 +1,85 @@
+# Deploys the images of one commit to the demo CapRover server, verifies them and rolls back on failure
+# (deploy/deploy.mjs). Called by deploy-demo.yml (every push to develop) and deploy-manual.yml.
+# Requires the GitHub environment `demo` (docs/demo-deployment.md): variables DEMO_DEPLOY_ENABLED=true, DEMO_URL,
+# CAPROVER_URL, optional CAPROVER_APP_AUTHORIZATION / _BFF / _CONSOLE; secrets CAPROVER_TOKEN_AUTHORIZATION,
+# CAPROVER_TOKEN_BFF, CAPROVER_TOKEN_CONSOLE,
+# optional DEPLOY_NOTIFY_WEBHOOK.
+name: Deploy to CapRover
+on:
+  workflow_call:
+    inputs:
+      sha: {type: string, required: true}
+      components: {type: string, required: true, description: 'Comma-separated: authorization,bff,console (empty: nothing changed)'}
+      reason: {type: string, default: ''}
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  not-configured:
+    name: Deployment not configured
+    if: vars.DEMO_DEPLOY_ENABLED != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::notice title=Demo deployment skipped::The demo environment is not configured (repository variable DEMO_DEPLOY_ENABLED is not 'true'). Images were built and pushed; see docs/demo-deployment.md."
+          echo "### Demo deployment skipped — CapRover target not configured (DEMO_DEPLOY_ENABLED)" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy, verify, roll back on failure
+    if: vars.DEMO_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: demo
+      url: ${{ vars.DEMO_URL }}
+    # One deployment to the demo at a time, whichever workflow started it; a queued deployment waits.
+    concurrency: {group: caprover-demo-hive-platform, cancel-in-progress: false}
+    steps:
+      - uses: actions/checkout@v7
+        with: {ref: "${{ inputs.sha }}", sparse-checkout: deploy}
+      - uses: actions/setup-node@v7
+        with: {node-version: 22}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with: {registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}"}
+      - name: Nothing to deploy
+        if: inputs.components == ''
+        run: echo "### No component changed since the verified demo version — nothing deployed" >> "$GITHUB_STEP_SUMMARY"
+      - name: Deploy ${{ inputs.components }} @ ${{ inputs.sha }}
+        id: deploy
+        if: inputs.components != ''
+        env:
+          DEPLOYER: caprover
+          DEPLOY_SHA: ${{ inputs.sha }}
+          DEPLOY_COMPONENTS: ${{ inputs.components }}
+          IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+          DEMO_URL: ${{ vars.DEMO_URL }}
+          CAPROVER_URL: ${{ vars.CAPROVER_URL }}
+          CAPROVER_APP_AUTHORIZATION: ${{ vars.CAPROVER_APP_AUTHORIZATION }}
+          CAPROVER_APP_BFF: ${{ vars.CAPROVER_APP_BFF }}
+          CAPROVER_APP_CONSOLE: ${{ vars.CAPROVER_APP_CONSOLE }}
+          CAPROVER_TOKEN_AUTHORIZATION: ${{ secrets.CAPROVER_TOKEN_AUTHORIZATION }}
+          CAPROVER_TOKEN_BFF: ${{ secrets.CAPROVER_TOKEN_BFF }}
+          CAPROVER_TOKEN_CONSOLE: ${{ secrets.CAPROVER_TOKEN_CONSOLE }}
+        run: |
+          export IMAGE_PREFIX="${IMAGE_PREFIX,,}"
+          node deploy/deploy.mjs
+      - name: Notify
+        if: always() && inputs.components != ''
+        env:
+          WEBHOOK: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK }}
+          OUTCOME: ${{ steps.deploy.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$OUTCOME" = "success" ]; then
+            text="✅ Hive platform ${{ inputs.sha }} (${{ inputs.components }}) deployed to the demo and verified. ${{ inputs.reason }} $RUN_URL"
+            echo "::notice title=Demo deployment succeeded::${{ inputs.components }} @ ${{ inputs.sha }}"
+          else
+            text="❌ Hive platform deployment of ${{ inputs.sha }} (${{ inputs.components }}) failed; see the run summary for the rollback result. ${{ inputs.reason }} $RUN_URL"
+            echo "::error title=Demo deployment failed::${{ inputs.components }} @ ${{ inputs.sha }} — see the job summary (rolled back where possible)"
+          fi
+          # Optional chat notification (Slack, Mattermost, Teams workflow or any webhook accepting {"text": …}).
+          if [ -n "$WEBHOOK" ]; then
+            curl -fsS -m 15 -H 'Content-Type: application/json' -d "$(node -e 'console.log(JSON.stringify({text: process.argv[1]}))' "$text")" "$WEBHOOK" || echo "::warning::notification webhook failed"
+          fi
