@@ -54,6 +54,10 @@ await instance.unmount();
 
 `@hive-platform/workspace` builds multi-slot layouts on top of this API; any host can use the runtime directly.
 
+## Artifact formats and loaders
+
+`MfeRuntime` delegates to one loader per `artifact.format`: `HiveEsModuleLoader` (Blob URL of the verified bytes), `WebpackFederationLoader` (container script with SRI, `init`/`get`) and `ViteFederationLoader` (`import(url)`, `init`/`get`); `options.loaders` adds or replaces loaders. All formats provide the same `{contractVersion, create()}` micro-app. Upstream artifacts are served same-origin by the BFF artifact gateway; see [MFE registration](mfe-registration.md).
+
 ## Diagnostics
 
 | Code | Meaning |
@@ -62,7 +66,8 @@ await instance.unmount();
 | `ARTIFACT_NETWORK_FAILURE` | the artifact URL could not be reached |
 | `ARTIFACT_HTTP_ERROR` | non-2xx response (details.status) |
 | `ARTIFACT_INTEGRITY_UNSUPPORTED` / `_MISMATCH` | no usable SRI value / bytes differ from the registered digest; code is never executed |
-| `ARTIFACT_MODULE_FORMAT` | the bytes are not an evaluable ES module, or format is not ES_MODULE |
+| `ARTIFACT_MODULE_FORMAT` | the bytes are not an evaluable module, or no loader exists for the format |
+| `FEDERATION_*` | Module Federation: container script refused, no container, init failure, exposed module not found |
 | `MICRO_APP_CONTRACT_INVALID` | missing default export `{contractVersion, create}` or invalid instance shape |
 | `MICRO_APP_CONTRACT_MISMATCH` | artifact implements a different contract minor/major than its manifest declares |
 | `MOUNT_FAILED`, `MOUNT_TIMEOUT`, `UPDATE_FAILED`, `UPDATE_TIMEOUT`, `UNMOUNT_FAILED`, `UNMOUNT_TIMEOUT` | lifecycle failures (default deadline 15 s) |

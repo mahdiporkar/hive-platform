@@ -28,7 +28,16 @@ public final class ManifestDocuments {
 
   public record Navigation(String label, Integer order, String icon) {}
   public record Route(String key, String path, String access, String resource, String action, Navigation navigation) {}
-  public record Artifact(String url, String integrity, String format) {}
+  /**
+   * Executable artifact. {@code ES_MODULE} default-exports the micro-app; the federation formats expose it through a
+   * Module Federation container ({@code remoteName} is the global a webpack container assigns, {@code exposedModule}
+   * the container key, e.g. {@code ./plugin}).
+   */
+  public record Artifact(String url, String integrity, String format, String remoteName, String exposedModule) {
+    public boolean federated() { return !"ES_MODULE".equals(format); }
+  }
+
+  public static final Set<String> FORMATS = Set.of("ES_MODULE", "WEBPACK_FEDERATION", "VITE_FEDERATION");
   public record MicroFrontendManifest(String schemaVersion, String manifestVersion, String contractVersion, String runtimeVersion,
       String applicationKey, String moduleKey, String displayName, String resourceManifestVersion, Artifact artifact,
       List<Route> routes, String styleIsolation, List<Compatibility.Diagnostic> warnings, String checksum, JsonNode document) {}
@@ -40,6 +49,8 @@ public final class ManifestDocuments {
   private static final Pattern ROUTE_PATH = Pattern.compile("/(?:[A-Za-z0-9._~-]+|:[a-zA-Z][a-zA-Z0-9]*)(?:/(?:[A-Za-z0-9._~-]+|:[a-zA-Z][a-zA-Z0-9]*))*(?:/\\*)?|/");
   private static final Pattern SRI = Pattern.compile("sha(256|384|512)-[A-Za-z0-9+/]+={0,2}");
   private static final Set<String> ACCESS = Set.of("PUBLIC", "HYBRID", "AUTHENTICATED");
+  private static final Pattern REMOTE_NAME = Pattern.compile("[A-Za-z_$][A-Za-z0-9_$]{0,79}");
+  private static final Pattern EXPOSED_MODULE = Pattern.compile("\\./[A-Za-z0-9._/-]{1,200}");
   private static final ObjectMapper CANONICAL = JsonMapper.builder()
       .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
 
@@ -84,7 +95,17 @@ public final class ManifestDocuments {
     JsonNode artifactNode = document.path("artifact");
     requireObject(artifactNode, "artifact");
     String format = text(artifactNode, "format", true);
-    if (!"ES_MODULE".equals(format)) throw new HiveException(HttpStatus.UNPROCESSABLE_ENTITY, "MODULE_FORMAT_UNSUPPORTED", "artifact.format must be ES_MODULE, received " + format);
+    if (!FORMATS.contains(format)) throw new HiveException(HttpStatus.UNPROCESSABLE_ENTITY, "MODULE_FORMAT_UNSUPPORTED",
+        "artifact.format must be ES_MODULE, WEBPACK_FEDERATION or VITE_FEDERATION, received " + format);
+    String remoteName = text(artifactNode, "remoteName", false), exposedModule = text(artifactNode, "exposedModule", false);
+    if ("ES_MODULE".equals(format) && (remoteName != null || exposedModule != null))
+      throw invalid("artifact.remoteName and artifact.exposedModule apply only to Module Federation formats");
+    if ("WEBPACK_FEDERATION".equals(format) && (remoteName == null || !REMOTE_NAME.matcher(remoteName).matches()))
+      throw invalid("artifact.remoteName (the global the webpack container assigns) is required for WEBPACK_FEDERATION and must be a JavaScript identifier");
+    if ("VITE_FEDERATION".equals(format) && remoteName != null && !REMOTE_NAME.matcher(remoteName).matches())
+      throw invalid("artifact.remoteName must be a JavaScript identifier");
+    if (!"ES_MODULE".equals(format) && (exposedModule == null || !EXPOSED_MODULE.matcher(exposedModule).matches() || exposedModule.contains("..")))
+      throw invalid("artifact.exposedModule (e.g. ./plugin) is required for " + format);
     String url = validateArtifactUrl(text(artifactNode, "url", true));
     String integrity = text(artifactNode, "integrity", false);
     if (integrity == null && requireIntegrity) throw new HiveException(HttpStatus.UNPROCESSABLE_ENTITY, "INTEGRITY_REQUIRED", "artifact.integrity (SRI) is required");
@@ -113,7 +134,7 @@ public final class ManifestDocuments {
     String display = text(document, "displayName", true);
     return new MicroFrontendManifest(text(document, "schemaVersion", true), text(document, "manifestVersion", true), text(document, "contractVersion", true),
         text(document, "runtimeVersion", true), text(document, "applicationKey", true), text(document, "moduleKey", true), display,
-        text(document, "resourceManifestVersion", false), new Artifact(url, integrity, format), routes, isolation == null ? "SCOPED" : isolation, warnings,
+        text(document, "resourceManifestVersion", false), new Artifact(url, integrity, format, remoteName, exposedModule), routes, isolation == null ? "SCOPED" : isolation, warnings,
         checksum(document), document);
   }
 

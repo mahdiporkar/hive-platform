@@ -29,41 +29,56 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class ModuleRegistry {
   public record Module(UUID id, String applicationKey, String moduleKey, String displayName, String definitionMode, String mfManifestUrl,
-      String resourceManifestUrl, String activeArtifactVersion, String activeResourceVersion, boolean archived, long revision, Instant createdAt) {}
-  public record NewModule(String applicationKey, String moduleKey, String displayName, String definitionMode, String mfManifestUrl, String resourceManifestUrl) {}
-  public record ModuleUpdate(String displayName, String definitionMode, String mfManifestUrl, String resourceManifestUrl, Boolean archived, long revision) {}
+      String resourceManifestUrl, String activeArtifactVersion, String activeResourceVersion, boolean archived, long revision, Instant createdAt,
+      String description, String icon, String environment, String entryUrl) {}
+  public record NewModule(String applicationKey, String moduleKey, String displayName, String definitionMode, String mfManifestUrl, String resourceManifestUrl,
+      String description, String icon, String environment, String entryUrl) {}
+  /** Null leaves a registration field unchanged; an empty string clears it. Manifest URLs keep their replace semantics. */
+  public record ModuleUpdate(String displayName, String definitionMode, String mfManifestUrl, String resourceManifestUrl, Boolean archived, long revision,
+      String description, String icon, String environment, String entryUrl) {}
+  /** Upstream location of a module's active artifact, for the runtime artifact gateway. Never exposed to browsers. */
+  public record ArtifactTarget(String applicationKey, String moduleKey, String manifestVersion, String url, String integrity, String format) {}
+  public record GrantImpact(String resourceKey, String action, String subject, String reason) {}
   public record ResourceRevision(UUID id, String moduleKey, String manifestVersion, String schemaVersion, String checksum, String status, String source,
       String sourceUrl, String createdBy, Instant createdAt, String publishedBy, Instant publishedAt, boolean active, JsonNode document) {}
   public record ArtifactRevision(UUID id, String moduleKey, String manifestVersion, String contractVersion, String runtimeVersion, String schemaVersion,
       String resourceManifestVersion, String artifactUrl, String integrity, String checksum, String createdBy, Instant createdAt, boolean active, JsonNode document) {}
   public record Change(String kind, String resourceKey, String detail) {}
-  public record Diff(String moduleKey, String fromVersion, String toVersion, List<Change> changes, boolean conflicts) {}
+  /** {@code impact}: active grants that publishing would leave on archived resources or actions; {@code warnings}: active routes it would break. */
+  public record Diff(String moduleKey, String fromVersion, String toVersion, List<Change> changes, boolean conflicts, List<GrantImpact> impact, List<String> warnings) {}
   public record Release(UUID id, String action, String resourceVersion, String artifactVersion, JsonNode summary, String actor, Instant occurredAt) {}
   public record Overlay(String routeKey, String label, Integer order, boolean hidden, long revision) {}
   public record ImportResult<T>(T revision, boolean created, List<Compatibility.Diagnostic> warnings) {}
 
   private static final Pattern MODULE_KEY = Pattern.compile("[a-z][a-z0-9-]{1,79}");
   private static final Set<String> MODES = Set.of("MANIFEST", "MANUAL", "HYBRID");
+  private static final Pattern ICON = Pattern.compile("[A-Za-z0-9_-]{1,80}");
+  private static final Pattern ENVIRONMENT = Pattern.compile("[A-Za-z0-9_.-]{1,40}");
 
   private final JdbcClient db;
   private final ObjectMapper json;
   private final ResourceCatalog catalog;
   private final ManifestDocuments documents;
   private final ManifestFetcher fetcher;
+  private final ArtifactInspector inspector;
   private final UiArtifactUriPolicy policy;
   private final AuditLog audit;
   private final TransactionTemplate tx;
+  private final boolean verifyOnActivation;
 
-  public ModuleRegistry(JdbcClient db, ObjectMapper json, ResourceCatalog catalog, ManifestDocuments documents, ManifestFetcher fetcher,
-      UiArtifactUriPolicy policy, AuditLog audit, TransactionTemplate tx) {
+  public ModuleRegistry(JdbcClient db, ObjectMapper json, ResourceCatalog catalog, ManifestDocuments documents, ManifestFetcher fetcher, ArtifactInspector inspector,
+      UiArtifactUriPolicy policy, AuditLog audit, TransactionTemplate tx,
+      @org.springframework.beans.factory.annotation.Value("${hive.artifacts.verify-on-activation:true}") boolean verifyOnActivation) {
     this.db = db;
     this.json = json;
     this.catalog = catalog;
     this.documents = documents;
     this.fetcher = fetcher;
+    this.inspector = inspector;
     this.policy = policy;
     this.audit = audit;
     this.tx = tx;
+    this.verifyOnActivation = verifyOnActivation;
   }
 
   // ---- modules -----------------------------------------------------------------------------------------------
@@ -71,7 +86,8 @@ public class ModuleRegistry {
   public List<Module> modules(String applicationKey) {
     return db.sql("""
         select m.id, a.application_key, m.module_key, m.display_name, m.definition_mode, m.mf_manifest_url, m.resource_manifest_url,
-               ar.manifest_version as artifact_version, rr.manifest_version as resource_version, m.archived, m.revision, m.created_at
+               ar.manifest_version as artifact_version, rr.manifest_version as resource_version, m.archived, m.revision, m.created_at,
+               m.description, m.icon, m.environment, m.entry_url
         from micro_app m join application a on a.id = m.application_id
         left join artifact_revision ar on ar.id = m.active_artifact_id
         left join resource_manifest_revision rr on rr.id = m.active_resource_revision_id
@@ -79,7 +95,8 @@ public class ModuleRegistry {
         .param("app", applicationKey == null ? "" : applicationKey)
         .query((rs, n) -> new Module(rs.getObject("id", UUID.class), rs.getString("application_key"), rs.getString("module_key"), rs.getString("display_name"),
             rs.getString("definition_mode"), rs.getString("mf_manifest_url"), rs.getString("resource_manifest_url"), rs.getString("artifact_version"),
-            rs.getString("resource_version"), rs.getBoolean("archived"), rs.getLong("revision"), rs.getTimestamp("created_at").toInstant()))
+            rs.getString("resource_version"), rs.getBoolean("archived"), rs.getLong("revision"), rs.getTimestamp("created_at").toInstant(),
+            rs.getString("description"), rs.getString("icon"), rs.getString("environment"), rs.getString("entry_url")))
         .list();
   }
 
@@ -96,10 +113,17 @@ public class ModuleRegistry {
     UUID app = catalog.applicationId(request.applicationKey());
     if (db.sql("select archived from application where id = ?").param(app).query(Boolean.class).single()) throw HiveException.conflict("Application is archived");
     UUID id = UUID.randomUUID();
-    if (db.sql("insert into micro_app(id, application_id, module_key, display_name, definition_mode, mf_manifest_url, resource_manifest_url) values (?, ?, ?, ?, ?, ?, ?) on conflict (module_key) do nothing")
-        .params(id, app, request.moduleKey(), request.displayName(), mode, manifestUrl(request.mfManifestUrl()), manifestUrl(request.resourceManifestUrl())).update() != 1)
+    String description = description(request.description()), icon = token(request.icon(), ICON, "icon"), environment = token(request.environment(), ENVIRONMENT, "environment");
+    String entry = entryUrl(request.entryUrl());
+    if (db.sql("""
+        insert into micro_app(id, application_id, module_key, display_name, definition_mode, mf_manifest_url, resource_manifest_url, description, icon, environment, entry_url)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (module_key) do nothing""")
+        .params(id, app, request.moduleKey(), request.displayName(), mode, manifestUrl(request.mfManifestUrl()), manifestUrl(request.resourceManifestUrl()),
+            description, icon, environment, entry).update() != 1)
       throw HiveException.conflict("Module " + request.moduleKey() + " already exists");
-    audit.success("module.registered", Map.of("application", request.applicationKey(), "module", request.moduleKey(), "definitionMode", mode));
+    var details = new LinkedHashMap<String, Object>(Map.of("application", request.applicationKey(), "module", request.moduleKey(), "definitionMode", mode));
+    if (entry != null) details.put("entryUrl", entry);
+    audit.success("module.registered", details);
     bumpRuntime();
     return module(request.moduleKey());
   }
@@ -110,14 +134,44 @@ public class ModuleRegistry {
     String mode = update.definitionMode() == null ? current.definitionMode() : update.definitionMode();
     if (!MODES.contains(mode)) throw HiveException.invalid("definitionMode must be MANIFEST, MANUAL or HYBRID");
     if (update.displayName() != null && (update.displayName().isBlank() || update.displayName().length() > 255)) throw HiveException.invalid("Invalid displayName");
+    String description = update.description() == null ? current.description() : description(update.description());
+    String icon = update.icon() == null ? current.icon() : token(update.icon(), ICON, "icon");
+    String environment = update.environment() == null ? current.environment() : token(update.environment(), ENVIRONMENT, "environment");
+    String entry = update.entryUrl() == null ? current.entryUrl() : entryUrl(update.entryUrl());
     if (db.sql("""
         update micro_app set display_name = coalesce(?, display_name), definition_mode = ?, mf_manifest_url = ?, resource_manifest_url = ?,
-          archived = coalesce(?, archived), revision = revision + 1, updated_at = now() where id = ? and revision = ?""")
-        .params(update.displayName(), mode, manifestUrl(update.mfManifestUrl()), manifestUrl(update.resourceManifestUrl()), update.archived(), current.id(), update.revision())
+          archived = coalesce(?, archived), description = ?, icon = ?, environment = ?, entry_url = ?, revision = revision + 1, updated_at = now()
+        where id = ? and revision = ?""")
+        .params(update.displayName(), mode, manifestUrl(update.mfManifestUrl()), manifestUrl(update.resourceManifestUrl()), update.archived(),
+            description, icon, environment, entry, current.id(), update.revision())
         .update() != 1) throw HiveException.stale();
-    audit.success(Boolean.TRUE.equals(update.archived()) ? "module.archived" : "module.updated", Map.of("module", moduleKey));
+    var details = new LinkedHashMap<String, Object>(Map.of("module", moduleKey));
+    if (!Objects.equals(entry, current.entryUrl())) details.put("entryUrl", String.valueOf(entry));
+    if (!mode.equals(current.definitionMode())) details.put("definitionMode", mode);
+    audit.success(Boolean.TRUE.equals(update.archived()) ? "module.archived" : "module.updated", details);
     bumpRuntime();
     return module(moduleKey);
+  }
+
+  private String entryUrl(String url) {
+    if (url == null || url.isBlank()) return null;
+    try {
+      return policy.validateConfigured(url, UiArtifactUriPolicy.ArtifactType.REMOTE_ENTRY, "Entry URL").toString();
+    } catch (IllegalArgumentException rejected) {
+      throw new HiveException(HttpStatus.UNPROCESSABLE_ENTITY, "ARTIFACT_LOCATION_REJECTED", rejected.getMessage());
+    }
+  }
+
+  private static String description(String value) {
+    if (value == null || value.isBlank()) return null;
+    if (value.length() > 1000) throw HiveException.invalid("description must be at most 1000 characters");
+    return value;
+  }
+
+  private static String token(String value, Pattern pattern, String field) {
+    if (value == null || value.isBlank()) return null;
+    if (!pattern.matcher(value).matches()) throw HiveException.invalid(field + " must match " + pattern.pattern());
+    return value;
   }
 
   private String manifestUrl(String url) {
@@ -216,9 +270,45 @@ public class ModuleRegistry {
       before.stream().filter(a -> !after.contains(a)).forEach(a -> changes.add(new Change("ACTION_ARCHIVED", node.key(), a)));
     }
     var declared = manifest.resources().stream().map(ResourceCatalog.ResourceNode::key).toList();
+    Set<String> archivedKeys = new java.util.HashSet<>();
     current.values().stream().filter(r -> "MANIFEST".equals(r.origin()) && moduleKey.equals(r.ownerModuleKey()) && !r.archived() && !declared.contains(r.key()))
-        .forEach(r -> changes.add(new Change("ARCHIVED", r.key(), r.type())));
-    return new Diff(moduleKey, module.activeResourceVersion(), version, changes, conflicts);
+        .forEach(r -> { changes.add(new Change("ARCHIVED", r.key(), r.type())); archivedKeys.add(r.key()); });
+    // Hybrid governance: manual nodes are never removed by a manifest; one under a node the manifest drops blocks publication.
+    for (var resource : current.values()) {
+      if ("MANUAL".equals(resource.origin()) && !resource.archived() && archivedKeys.contains(resource.parentKey())) {
+        conflicts = true;
+        changes.add(new Change("CONFLICT", resource.key(), "manual resource under " + resource.parentKey() + ", which this version removes; move or archive it first"));
+      }
+    }
+    Set<String> archivedActions = new java.util.HashSet<>();
+    changes.stream().filter(c -> "ACTION_ARCHIVED".equals(c.kind())).forEach(c -> archivedActions.add(c.resourceKey() + "#" + c.detail()));
+    List<GrantImpact> impact = new ArrayList<>();
+    for (var grant : activeGrants(applicationId(module))) {
+      if (archivedKeys.contains(grant.resourceKey())) impact.add(new GrantImpact(grant.resourceKey(), grant.action(), grant.subject(), "RESOURCE_ARCHIVED"));
+      else if (archivedActions.contains(grant.resourceKey() + "#" + grant.action())) impact.add(new GrantImpact(grant.resourceKey(), grant.action(), grant.subject(), "ACTION_ARCHIVED"));
+    }
+    List<String> warnings = new ArrayList<>();
+    var active = activeArtifact(module.id());
+    if (active != null) {
+      for (var route : documents.microFrontendManifest(active.document()).routes()) {
+        if (route.resource() == null) continue;
+        if (archivedKeys.contains(route.resource())) warnings.add("Active route " + route.key() + " (" + route.path() + ") references " + route.resource() + ", which this version removes");
+        else if (archivedActions.contains(route.resource() + "#" + route.action())) warnings.add("Active route " + route.key() + " requires action " + route.action() + " on " + route.resource() + ", which this version removes");
+      }
+    }
+    return new Diff(moduleKey, module.activeResourceVersion(), version, changes, conflicts, impact, warnings);
+  }
+
+  /** Active grants of one application with a readable subject ({@code user:<name>}, {@code role:<key>}, {@code group:<key>}). */
+  private List<GrantImpact> activeGrants(UUID application) {
+    return db.sql("""
+        select r.resource_key, g.action_key, lower(g.subject_type) || ':' || coalesce(u.display_name, ro.role_key, gr.group_key, g.subject_id::text) as subject
+        from permission_grant g join resource r on r.id = g.resource_id
+        left join hive_user u on g.subject_type = 'USER' and u.id = g.subject_id
+        left join hive_role ro on g.subject_type = 'ROLE' and ro.id = g.subject_id
+        left join hive_group gr on g.subject_type = 'GROUP' and gr.id = g.subject_id
+        where g.revoked_at is null and r.application_id = ? order by r.resource_key, g.action_key""").param(application)
+        .query((rs, n) -> new GrantImpact(rs.getString("resource_key"), rs.getString("action_key"), rs.getString("subject"), null)).list();
   }
 
   @Transactional
@@ -261,16 +351,37 @@ public class ModuleRegistry {
 
   // ---- artifacts (micro-frontend manifests) ------------------------------------------------------------------
 
-  public ImportResult<ArtifactRevision> fetchArtifact(String moduleKey, String url) {
+  public ImportResult<ArtifactRevision> fetchArtifact(String moduleKey, String url) { return fetchArtifact(moduleKey, url, false); }
+
+  public ImportResult<ArtifactRevision> fetchArtifact(String moduleKey, String url, boolean pinIntegrity) {
     Module module = module(moduleKey);
     String location = url == null || url.isBlank() ? module.mfManifestUrl() : manifestUrl(url);
     if (location == null) throw HiveException.invalid("No micro-frontend manifest URL registered for " + moduleKey);
-    return registerArtifact(moduleKey, fetcher.fetch(location), "FETCH", location);
+    return registerArtifact(moduleKey, fetcher.fetch(location), "FETCH", location, pinIntegrity);
   }
 
-  @Transactional
   public ImportResult<ArtifactRevision> registerArtifact(String moduleKey, JsonNode document, String source, String sourceUrl) {
+    return registerArtifact(moduleKey, document, source, sourceUrl, false);
+  }
+
+  /**
+   * Registers an immutable artifact revision. With {@code pinIntegrity}, a manifest without {@code artifact.integrity}
+   * whose artifact is an absolute URL gets the SRI of the bytes served now (an operator-confirmed trust-on-registration);
+   * the stored document then carries that value, so every later load is verified against it.
+   */
+  @Transactional
+  public ImportResult<ArtifactRevision> registerArtifact(String moduleKey, JsonNode document, String source, String sourceUrl, boolean pinIntegrity) {
     Module module = module(moduleKey);
+    boolean pinned = false;
+    if (pinIntegrity && document != null && document.path("artifact").isObject() && !document.path("artifact").hasNonNull("integrity")) {
+      String url = document.path("artifact").path("url").asText("");
+      if (url.startsWith("http://") || url.startsWith("https://")) {
+        var copy = document.deepCopy();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) copy.get("artifact")).put("integrity", inspector.pin(url));
+        document = copy;
+        pinned = true;
+      }
+    }
     var manifest = documents.microFrontendManifest(document);
     requireIdentity(module, manifest.applicationKey(), manifest.moduleKey());
     var existing = artifactRow(module.id(), manifest.manifestVersion());
@@ -284,7 +395,8 @@ public class ModuleRegistry {
         .params(UUID.randomUUID(), module.id(), manifest.manifestVersion(), manifest.schemaVersion(), manifest.contractVersion(), manifest.runtimeVersion(),
             manifest.resourceManifestVersion(), manifest.artifact().url(), manifest.artifact().integrity() == null ? "" : manifest.artifact().integrity(),
             manifest.checksum(), document.toString(), source, sourceUrl, Actor.currentId()).update();
-    audit.success("manifest.artifact.registered", Map.of("module", moduleKey, "version", manifest.manifestVersion(), "contractVersion", manifest.contractVersion()));
+    audit.success("manifest.artifact.registered", Map.of("module", moduleKey, "version", manifest.manifestVersion(), "contractVersion", manifest.contractVersion(),
+        "format", manifest.artifact().format(), "integrityPinned", pinned));
     return new ImportResult<>(artifactRow(module.id(), manifest.manifestVersion()), true, manifest.warnings());
   }
 
@@ -317,6 +429,8 @@ public class ModuleRegistry {
       }
     }
     validateRoutes(module, manifest, resourceVersion);
+    String url = manifest.artifact().url();
+    if (verifyOnActivation && (url.startsWith("http://") || url.startsWith("https://"))) inspector.verify(url, manifest.artifact().integrity());
     db.sql("update micro_app set active_artifact_id = ?, updated_at = now() where id = ?").params(artifact.id(), module.id()).update();
     release(module, "ARTIFACT_ACTIVATED", null, artifact.id(), Map.of("version", version, "previous", String.valueOf(module.activeArtifactVersion())));
     audit.success("manifest.artifact.activated", Map.of("module", moduleKey, "version", version, "previous", String.valueOf(module.activeArtifactVersion())));
@@ -389,6 +503,16 @@ public class ModuleRegistry {
         where r.micro_app_id = ? order by r.sequence""").param(module.id())
         .query((rs, n) -> new Release(rs.getObject("id", UUID.class), rs.getString("action"), rs.getString("resource_version"), rs.getString("artifact_version"),
             readTree(rs.getString("summary")), rs.getString("actor"), rs.getTimestamp("occurred_at").toInstant())).list();
+  }
+
+  /** Active artifact of an active module of an active application, or empty (unknown, archived or deactivated). */
+  public java.util.Optional<ArtifactTarget> artifactTarget(String moduleKey) {
+    return db.sql("""
+        select a.application_key, m.module_key, ar.manifest_version, ar.artifact_url, ar.integrity, ar.document ->> 'artifact' as artifact
+        from micro_app m join application a on a.id = m.application_id join artifact_revision ar on ar.id = m.active_artifact_id
+        where m.module_key = ? and not m.archived and not a.archived""").param(moduleKey)
+        .query((rs, n) -> new ArtifactTarget(rs.getString("application_key"), rs.getString("module_key"), rs.getString("manifest_version"),
+            rs.getString("artifact_url"), rs.getString("integrity"), readTree(rs.getString("artifact")).path("format").asText("ES_MODULE"))).optional();
   }
 
   public long runtimeRevision() {

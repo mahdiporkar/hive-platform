@@ -18,7 +18,8 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
  */
 @Configuration
 public class SecurityConfiguration {
-  public static final String[] ANONYMOUS_CAPABLE = {"/api/public/**", "/api/routes/**", "/auth/csrf"};
+  /** {@code /api/mfe/**}: artifact gateway; it decides per module from the caller's (public or user) runtime context. */
+  public static final String[] ANONYMOUS_CAPABLE = {"/api/public/**", "/api/routes/**", "/api/mfe/**", "/auth/csrf"};
   public static final String[] SESSION_REQUIRED = {"/api/me/**", "/api/admin/**", "/api/integrations/**"};
 
   /** Firewall rejections (encoded traversal, duplicate slashes, backslashes...) are client errors, not authentication failures. */

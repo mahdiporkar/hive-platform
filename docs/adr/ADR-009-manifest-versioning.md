@@ -4,7 +4,7 @@ Status: accepted; implemented in Phase 5.
 
 ## Decision
 
-- **Two contracts.** A *resource manifest* carries only authorization vocabulary (resources, actions). A *micro-frontend manifest* carries only an executable artifact, its routes and navigation hints. Each rejects the other's fields (`routes`/`artifact`/`url`… vs `resources`/`grants`…). Neither mentions a UI framework; the only artifact format is `ES_MODULE`.
+- **Two contracts.** A *resource manifest* carries only authorization vocabulary (resources, actions). A *micro-frontend manifest* carries only an executable artifact, its routes and navigation hints. Each rejects the other's fields (`routes`/`artifact`/`url`… vs `resources`/`grants`…). Neither mentions a UI framework; the only artifact format is `ES_MODULE` (extended with the Module Federation formats by [ADR-013](ADR-013-artifact-gateway.md)).
 - **Versions.** `manifestVersion` is the content version. A (module, version) pair is immutable: re-importing identical content (canonical, key-order-independent SHA-256) is idempotent; different content is `409 MANIFEST_VERSION_IMMUTABLE`. Compatibility fields are described in [compatibility](../compatibility.md).
 - **Lifecycle.** fetch/import → validate → DRAFT → diff → publish → (activate other published version = rollback/roll-forward). Validation runs the real catalog application inside an always-rolled-back transaction, so a draft exists only if publishing it would currently succeed. Publish re-validates under a module row lock.
 - **Immutability in the database.** Triggers reject any update or delete of published resource revisions and any update or delete of artifact revisions. Drafts may only be discarded.

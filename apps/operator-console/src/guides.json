@@ -304,5 +304,25 @@
       "قارن حالة HTTP والنتيجة والمدة لتحديد الإخفاقات أو البطء.",
       "طابق مفاتيح المسار والإجراء مع إعدادات الوكيل قبل تعديلها."
     ]
+  },
+  "resources": {
+    "en": [
+      "Choose an application, and optionally one micro-frontend, to see its persisted resource hierarchy.",
+      "Search or filter by type and origin; select a node to see its actions, ancestry, routes and grants.",
+      "Add or edit manual resources here. Manifest-owned resources change only through a new manifest revision (HYBRID modules accept manual children).",
+      "Use the Access tab to grant or revoke actions for users, groups or roles, and Effective permissions to see what a user can really do and why."
+    ],
+    "fa": [
+      "یک برنامه و در صورت نیاز یک میکروفرانت را انتخاب کنید تا سلسله‌مراتب ذخیره‌شدهٔ منابعش را ببینید.",
+      "با جست‌وجو یا فیلتر نوع و منشأ، گره را انتخاب کنید تا عملیات، مسیر والدها، مسیرها و مجوزهایش را ببینید.",
+      "منابع دستی را همین‌جا اضافه یا ویرایش کنید. منابع متعلق به مانیفست فقط با نسخهٔ جدید مانیفست تغییر می‌کنند (ماژول ترکیبی فرزند دستی می‌پذیرد).",
+      "در زبانهٔ «دسترسی» به کاربر، گروه یا نقش مجوز بدهید یا لغو کنید و در «دسترسی مؤثر» ببینید یک کاربر واقعاً چه می‌تواند و چرا."
+    ],
+    "ar": [
+      "اختر تطبيقًا، واختياريًا واجهة مصغرة، لعرض تسلسل مواردها المحفوظ.",
+      "ابحث أو صفِّ حسب النوع والمصدر؛ اختر عقدة لعرض إجراءاتها وآبائها ومساراتها وصلاحياتها.",
+      "أضف أو عدّل الموارد اليدوية هنا. تتغير موارد ملف التعريف فقط بمراجعة جديدة (الوحدات الهجينة تقبل عناصر فرعية يدوية).",
+      "استخدم تبويب الصلاحيات للمنح أو السحب للمستخدمين أو المجموعات أو الأدوار، والصلاحيات الفعلية لمعرفة ما يستطيعه المستخدم ولماذا."
+    ]
   }
 }

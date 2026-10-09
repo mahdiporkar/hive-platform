@@ -60,7 +60,7 @@ sequenceDiagram
 }
 ```
 
-Rules: ES_MODULE only; SRI required (`HIVE_ARTIFACT_REQUIRE_INTEGRITY`); `artifact.url` is a normalized same-origin path or an absolute URL accepted by the artifact network policy (`HIVE_ARTIFACT_NETWORK_POLICY` = `PRODUCTION_INTERNET` | `INTERNAL_ENTERPRISE` | `UNRESTRICTED` | `DEVELOPMENT`, `HIVE_ARTIFACT_ALLOW_HTTP`, `HIVE_ARTIFACT_ALLOWED_PRIVATE_CIDRS`); route paths are absolute, literal or `:param` segments with optional trailing `/*`, unique within the manifest and across active modules; `PUBLIC` routes cannot require a permission; resource and action are declared together.
+Rules: `format` is `ES_MODULE`, `WEBPACK_FEDERATION` (with `remoteName` and `exposedModule`) or `VITE_FEDERATION` (with `exposedModule`) — see [MFE registration](mfe-registration.md); upstream artifact URLs reach browsers only as `/api/mfe/{module}/{version}/…`; SRI required (`HIVE_ARTIFACT_REQUIRE_INTEGRITY`); `artifact.url` is a normalized same-origin path or an absolute URL accepted by the artifact network policy (`HIVE_ARTIFACT_NETWORK_POLICY` = `PRODUCTION_INTERNET` | `INTERNAL_ENTERPRISE` | `UNRESTRICTED` | `DEVELOPMENT`, `HIVE_ARTIFACT_ALLOW_HTTP`, `HIVE_ARTIFACT_ALLOWED_PRIVATE_CIDRS`); route paths are absolute, literal or `:param` segments with optional trailing `/*`, unique within the manifest and across active modules; `PUBLIC` routes cannot require a permission; resource and action are declared together.
 
 ## API (`OPERATOR` writes, platform `reader` reads)
 

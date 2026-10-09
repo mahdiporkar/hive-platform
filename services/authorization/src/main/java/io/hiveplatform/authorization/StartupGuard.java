@@ -23,7 +23,10 @@ class StartupGuard {
     new ProductionGuard(profile)
         .rule("HIVE_IDP_ALLOW_LOCAL_HTTP must be false", () -> idpLocalHttp)
         .rule("HIVE_ARTIFACT_NETWORK_POLICY must not be DEVELOPMENT", () -> "DEVELOPMENT".equalsIgnoreCase(artifactPolicy) || "DEV".equalsIgnoreCase(artifactPolicy))
-        .rule("HIVE_ARTIFACT_ALLOW_HTTP must be false", () -> artifactHttp)
+        // Browsers never load upstream artifacts directly (the BFF artifact gateway serves them same-origin); plain HTTP
+        // is acceptable only towards an explicitly allowlisted private network.
+        .rule("HIVE_ARTIFACT_ALLOW_HTTP requires HIVE_ARTIFACT_NETWORK_POLICY=INTERNAL_ENTERPRISE", () -> artifactHttp
+            && !"INTERNAL_ENTERPRISE".equalsIgnoreCase(artifactPolicy) && !"INTERNAL".equalsIgnoreCase(artifactPolicy))
         .rule("HIVE_ARTIFACT_REQUIRE_INTEGRITY must be true", () -> !integrity)
         .rule("HIVE_INTERNAL_PASSWORD is required (BFF channel)", internal::isBlank)
         .rule("HIVE_DB_PASSWORD must have at least 16 characters", () -> database.length() < 16)

@@ -17,4 +17,5 @@
 - Production hardening: fail-closed production profile, forwarded headers, log secrecy scan, branding scan, verification runner.
 - End-to-end acceptance: golden-path scenario against real Keycloak; documentation set with executable link/script checks; forwarded-header pass-through fix in both gateways.
 - Fix: RuntimeProxy forwards standard `multipart/form-data` (and PUT/PATCH/DELETE forms) intact — the BFF no longer parses request bodies before proxying (ADR-012); multipart regression and browser E2E suites.
+- Micro-frontend registration by IP/port or URL from the Operator Console (probe, format detection, integrity computed by Hive, wizard), same-origin BFF artifact gateway (`/api/mfe/**`), webpack and Vite Module Federation loaders, visual resource management with grants and effective-permission inspection, diff impact on grants and routes, context refresh in the default shell (ADR-013, Flyway V8).
 - No production release or completion of the full platform specification is claimed.

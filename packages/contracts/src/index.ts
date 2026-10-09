@@ -23,7 +23,12 @@ export interface Branding {name:string}
 export interface RuntimeApplication {key:string; displayName:string}
 export interface RouteNavigation {label:string; order?:number; icon?:string}
 export interface RuntimeRoute {key:string; path:string; access:AccessMode; resource?:string; action?:string; navigation?:RouteNavigation}
-export interface ArtifactDescriptor {url:string; integrity:string; format:'ES_MODULE'}
+/**
+ * ES_MODULE default-exports a HiveMicroApp. The Module Federation formats expose one through a container:
+ * remoteName is the global a webpack container assigns, exposedModule the container key (e.g. './plugin').
+ */
+export type ArtifactFormat = 'ES_MODULE'|'WEBPACK_FEDERATION'|'VITE_FEDERATION';
+export interface ArtifactDescriptor {url:string; integrity:string; format:ArtifactFormat; remoteName?:string; exposedModule?:string}
 /** A published, active module as delivered to consumers (runtime representation of a MicroFrontendManifest). */
 export interface RuntimeModule {
  applicationKey:string; moduleKey:string; displayName:string;
@@ -88,7 +93,7 @@ export interface HiveMicroAppInstance {
  unmount():void|Promise<void>;
  update?(context:HiveMountContext):void|Promise<void>;
 }
-/** Default export of an ES_MODULE artifact. Every create() call must return an independent instance. */
+/** Default export of an ES_MODULE artifact (or of a federated exposed module). Every create() call must return an independent instance. */
 export interface HiveMicroApp {contractVersion:Version; create():HiveMicroAppInstance}
 
 // ---- workspace -------------------------------------------------------------------------------------------------

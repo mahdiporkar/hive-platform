@@ -16,6 +16,10 @@ Menu visibility follows platform roles (UI hint only). Users without any platfor
 
 Build: `npm run build:console` (Vite, output `apps/operator-console/dist`). Deployments serve it as static files under `/console/` on the same origin as the BFF.
 
+## Micro-frontend registration and resource management
+
+*Micro apps & manifests → Register micro-frontend* registers an MFE from its IP/port or URL with connection, policy, format and manifest checks; *Resource management* shows the resource tree with governance-aware editing, grants and effective-permission inspection. See [MFE registration](mfe-registration.md).
+
 ## Languages and page guides
 
 The header language picker supports English, Persian and Arabic. Persian and Arabic use right-to-left layout, including Ant Design dialogs, tables and pagination. The choice is saved in this browser under `hive.console.language`, separately from a solution's language preference. Initial language follows the browser when supported, otherwise English.

@@ -974,5 +974,809 @@
   "Request failed": {
     "fa": "درخواست ناموفق بود",
     "ar": "تعذّر تنفيذ الطلب"
+  },
+  "Resource management": {
+    "fa": "مدیریت منابع",
+    "ar": "إدارة الموارد"
+  },
+  "Active grants": {
+    "fa": "مجوزهای فعال",
+    "ar": "الصلاحيات النشطة"
+  },
+  "Definition mode: {mode}": {
+    "fa": "حالت تعریف: {mode}",
+    "ar": "وضع التعريف: {mode}"
+  },
+  "Search name or key": {
+    "fa": "جست‌وجوی نام یا کلید",
+    "ar": "ابحث بالاسم أو المفتاح"
+  },
+  "Origin": {
+    "fa": "منشأ",
+    "ar": "المصدر"
+  },
+  "Show archived": {
+    "fa": "نمایش بایگانی‌شده‌ها",
+    "ar": "إظهار المؤرشفة"
+  },
+  "No resources match": {
+    "fa": "منبعی مطابق نیست",
+    "ar": "لا توجد موارد مطابقة"
+  },
+  "Pages not referenced by any active route": {
+    "fa": "صفحه‌هایی که هیچ مسیر فعالی به آن‌ها ارجاع نمی‌دهد",
+    "ar": "صفحات لا يشير إليها أي مسار نشط"
+  },
+  "Select a resource to see its details, routes and access": {
+    "fa": "برای دیدن جزئیات، مسیرها و دسترسی، یک منبع را انتخاب کنید",
+    "ar": "اختر موردًا لعرض تفاصيله ومساراته وصلاحياته"
+  },
+  "Add child": {
+    "fa": "افزودن فرزند",
+    "ar": "إضافة عنصر فرعي"
+  },
+  "Edit": {
+    "fa": "ویرایش",
+    "ar": "تعديل"
+  },
+  "Edit resource": {
+    "fa": "ویرایش منبع",
+    "ar": "تعديل المورد"
+  },
+  "Restore": {
+    "fa": "بازگردانی",
+    "ar": "استعادة"
+  },
+  "{count} active grants on this resource will stop being effective. Archive?": {
+    "fa": "{count} مجوز فعال روی این منبع دیگر مؤثر نخواهد بود. بایگانی شود؟",
+    "ar": "ستتوقف {count} صلاحيات نشطة على هذا المورد عن العمل. أرشفة؟"
+  },
+  "Archive this resource?": {
+    "fa": "این منبع بایگانی شود؟",
+    "ar": "أرشفة هذا المورد؟"
+  },
+  "Owned by the published resource manifest of module {module}. Change it by importing and publishing a new manifest revision.": {
+    "fa": "مالک این منبع، مانیفست منابع منتشرشدهٔ ماژول {module} است. برای تغییر، نسخهٔ جدیدی از مانیفست را وارد و منتشر کنید.",
+    "ar": "يملك هذا المورد ملف تعريف الموارد المنشور للوحدة {module}. غيّره باستيراد مراجعة جديدة ونشرها."
+  },
+  "Open module": {
+    "fa": "باز کردن ماژول",
+    "ar": "فتح الوحدة"
+  },
+  "Manifest-owned (HYBRID module): its fields change through a new manifest revision; manual children can be added.": {
+    "fa": "متعلق به مانیفست (ماژول ترکیبی): مشخصاتش با نسخهٔ جدید مانیفست تغییر می‌کند؛ افزودن فرزند دستی مجاز است.",
+    "ar": "مملوك لملف التعريف (وحدة هجينة): تتغير حقوله بمراجعة جديدة؛ يمكن إضافة عناصر فرعية يدويًا."
+  },
+  "Ancestry": {
+    "fa": "مسیر والدها",
+    "ar": "سلسلة الآباء"
+  },
+  "Owner module": {
+    "fa": "ماژول مالک",
+    "ar": "الوحدة المالكة"
+  },
+  "Manifest revision": {
+    "fa": "نسخهٔ مانیفست",
+    "ar": "مراجعة ملف التعريف"
+  },
+  "Descendants": {
+    "fa": "زیرمجموعه‌ها",
+    "ar": "العناصر التابعة"
+  },
+  "Allowed child types": {
+    "fa": "انواع مجاز فرزند",
+    "ar": "أنواع العناصر الفرعية المسموحة"
+  },
+  "Available actions": {
+    "fa": "عملیات قابل‌تعریف",
+    "ar": "الإجراءات المتاحة"
+  },
+  "Implicit on every resource; inherited by descendants": {
+    "fa": "روی همهٔ منابع ضمنی است و به زیرمجموعه‌ها به ارث می‌رسد",
+    "ar": "ضمني على كل مورد ويُورَّث للعناصر التابعة"
+  },
+  "Routes": {
+    "fa": "مسیرها",
+    "ar": "المسارات"
+  },
+  "No active route references this resource.": {
+    "fa": "هیچ مسیر فعالی به این منبع ارجاع نمی‌دهد.",
+    "ar": "لا يشير أي مسار نشط إلى هذا المورد."
+  },
+  "Effective permissions": {
+    "fa": "دسترسی مؤثر",
+    "ar": "الصلاحيات الفعلية"
+  },
+  "Navigation": {
+    "fa": "منو",
+    "ar": "التنقل"
+  },
+  "hidden": {
+    "fa": "پنهان",
+    "ar": "مخفي"
+  },
+  "Removing actions {actions} archives them; grants on them stop being effective. Continue?": {
+    "fa": "حذف عملیات {actions} آن‌ها را بایگانی می‌کند و مجوزهایشان بی‌اثر می‌شود. ادامه می‌دهید؟",
+    "ar": "إزالة الإجراءات {actions} تؤرشفها وتوقف صلاحياتها. متابعة؟"
+  },
+  "Lowercase letters, digits, dot, dash or underscore": {
+    "fa": "حروف کوچک، رقم، نقطه، خط تیره یا زیرخط",
+    "ar": "أحرف صغيرة أو أرقام أو نقطة أو شرطة أو شرطة سفلية"
+  },
+  "Keys are stable identifiers and cannot be changed later.": {
+    "fa": "کلید شناسهٔ پایدار است و بعداً قابل تغییر نیست.",
+    "ar": "المفاتيح معرّفات ثابتة ولا يمكن تغييرها لاحقًا."
+  },
+  "Parent": {
+    "fa": "والد",
+    "ar": "الأب"
+  },
+  "'manage' is implicit on every resource and is inherited by descendants.": {
+    "fa": "عملیات manage روی همهٔ منابع ضمنی است و به زیرمجموعه‌ها به ارث می‌رسد.",
+    "ar": "الإجراء manage ضمني على كل مورد ويُورَّث للعناصر التابعة."
+  },
+  "Archived resources cannot receive grants.": {
+    "fa": "به منابع بایگانی‌شده نمی‌توان مجوز داد.",
+    "ar": "لا يمكن منح صلاحيات لمورد مؤرشف."
+  },
+  "Grant access": {
+    "fa": "اعطای دسترسی",
+    "ar": "منح صلاحية"
+  },
+  "User": {
+    "fa": "کاربر",
+    "ar": "مستخدم"
+  },
+  "Group": {
+    "fa": "گروه",
+    "ar": "مجموعة"
+  },
+  "Choose a subject": {
+    "fa": "یک هویت انتخاب کنید",
+    "ar": "اختر جهة"
+  },
+  "Grant": {
+    "fa": "اعطا",
+    "ar": "منح"
+  },
+  "Direct assignments": {
+    "fa": "تخصیص‌های مستقیم",
+    "ar": "التعيينات المباشرة"
+  },
+  "No direct grants": {
+    "fa": "مجوز مستقیمی ثبت نشده",
+    "ar": "لا توجد صلاحيات مباشرة"
+  },
+  "Inherited 'manage' (from ancestors)": {
+    "fa": "manage به ارث رسیده (از والدها)",
+    "ar": "manage موروث (من الآباء)"
+  },
+  "Action grants apply to this resource only. Only manage is inherited by descendants (authorization model).": {
+    "fa": "مجوز عملیات فقط برای همین منبع است؛ فقط manage به زیرمجموعه‌ها به ارث می‌رسد (مدل مجوزدهی).",
+    "ar": "صلاحيات الإجراءات تخص هذا المورد فقط؛ وحده manage يُورَّث (نموذج التفويض)."
+  },
+  "Choose a user": {
+    "fa": "یک کاربر انتخاب کنید",
+    "ar": "اختر مستخدمًا"
+  },
+  "Inspect": {
+    "fa": "بررسی",
+    "ar": "فحص"
+  },
+  "Decision": {
+    "fa": "تصمیم",
+    "ar": "القرار"
+  },
+  "ALLOWED": {
+    "fa": "مجاز",
+    "ar": "مسموح"
+  },
+  "Reason": {
+    "fa": "دلیل",
+    "ar": "السبب"
+  },
+  "Explanation": {
+    "fa": "توضیح",
+    "ar": "الشرح"
+  },
+  "via": {
+    "fa": "از طریق",
+    "ar": "عبر"
+  },
+  "No grant applies": {
+    "fa": "هیچ مجوزی اعمال نمی‌شود",
+    "ar": "لا تنطبق أي صلاحية"
+  },
+  "Micro-frontend": {
+    "fa": "میکروفرانت",
+    "ar": "الواجهة المصغرة"
+  },
+  "All modules": {
+    "fa": "همهٔ ماژول‌ها",
+    "ar": "كل الوحدات"
+  },
+  "Resource tree": {
+    "fa": "درخت منابع",
+    "ar": "شجرة الموارد"
+  },
+  "Create an application first": {
+    "fa": "ابتدا یک برنامه بسازید",
+    "ar": "أنشئ تطبيقًا أولًا"
+  },
+  "Micro-frontend manifest is valid ({routes} routes)": {
+    "fa": "مانیفست میکروفرانت معتبر است ({routes} مسیر)",
+    "ar": "ملف تعريف الواجهة المصغرة صالح ({routes} مسارات)"
+  },
+  "Resource manifest is valid": {
+    "fa": "مانیفست منابع معتبر است",
+    "ar": "ملف تعريف الموارد صالح"
+  },
+  "Manifests declare {app}/{module}": {
+    "fa": "مانیفست‌ها {app}/{module} را اعلام می‌کنند",
+    "ar": "ملفات التعريف تعلن {app}/{module}"
+  },
+  "Manifests must declare applicationKey {app} and moduleKey {module}": {
+    "fa": "مانیفست‌ها باید applicationKey برابر {app} و moduleKey برابر {module} داشته باشند",
+    "ar": "يجب أن تعلن ملفات التعريف applicationKey {app} و moduleKey {module}"
+  },
+  "Already served by another active module: {paths}": {
+    "fa": "توسط ماژول فعال دیگری ارائه می‌شود: {paths}",
+    "ar": "تخدمه وحدة نشطة أخرى: {paths}"
+  },
+  "No route conflicts with active modules": {
+    "fa": "تداخل مسیری با ماژول‌های فعال وجود ندارد",
+    "ar": "لا تعارض في المسارات مع الوحدات النشطة"
+  },
+  "Every route references a declared resource and action": {
+    "fa": "همهٔ مسیرها به منبع و عملیات تعریف‌شده ارجاع می‌دهند",
+    "ar": "كل مسار يشير إلى مورد وإجراء معرّفين"
+  },
+  "Not declared yet: {items}": {
+    "fa": "هنوز تعریف نشده: {items}",
+    "ar": "غير معرّف بعد: {items}"
+  },
+  "they will be created as manual resources": {
+    "fa": "به‌صورت منابع دستی ایجاد می‌شوند",
+    "ar": "سيتم إنشاؤها كموارد يدوية"
+  },
+  "Artifact is available and unchanged since inspection": {
+    "fa": "آرتیفکت در دسترس است و از زمان بررسی تغییری نکرده",
+    "ar": "الحزمة متاحة ولم تتغير منذ الفحص"
+  },
+  "The served artifact changed since inspection; run Test connection again": {
+    "fa": "آرتیفکت ارائه‌شده از زمان بررسی تغییر کرده؛ دوباره «آزمون اتصال» را اجرا کنید",
+    "ar": "تغيرت الحزمة منذ الفحص؛ أعد اختبار الاتصال"
+  },
+  "Runtime format {format} matches the entry": {
+    "fa": "قالب اجرایی {format} با ورودی مطابقت دارد",
+    "ar": "تنسيق التشغيل {format} يطابق المدخل"
+  },
+  "Selected {selected} but the entry looks like {detected}": {
+    "fa": "{selected} انتخاب شده اما ورودی شبیه {detected} است",
+    "ar": "تم اختيار {selected} لكن المدخل يبدو {detected}"
+  },
+  "Run Test connection first": {
+    "fa": "ابتدا «آزمون اتصال» را اجرا کنید",
+    "ar": "شغّل اختبار الاتصال أولًا"
+  },
+  "Update registered address": {
+    "fa": "به‌روزرسانی نشانی ثبت‌شده",
+    "ar": "تحديث العنوان المسجل"
+  },
+  "Import resource manifest": {
+    "fa": "ورود مانیفست منابع",
+    "ar": "استيراد ملف تعريف الموارد"
+  },
+  "already imported": {
+    "fa": "قبلاً وارد شده",
+    "ar": "مستورد مسبقًا"
+  },
+  "Publish resource manifest": {
+    "fa": "انتشار مانیفست منابع",
+    "ar": "نشر ملف تعريف الموارد"
+  },
+  "Create missing resources": {
+    "fa": "ایجاد منابع ناموجود",
+    "ar": "إنشاء الموارد الناقصة"
+  },
+  "nothing to create": {
+    "fa": "چیزی برای ایجاد نیست",
+    "ar": "لا شيء لإنشائه"
+  },
+  "Register artifact version": {
+    "fa": "ثبت نسخهٔ آرتیفکت",
+    "ar": "تسجيل إصدار الحزمة"
+  },
+  "already registered": {
+    "fa": "قبلاً ثبت شده",
+    "ar": "مسجل مسبقًا"
+  },
+  "Saved as draft; activate from the module page": {
+    "fa": "به‌صورت پیش‌نویس ذخیره شد؛ از صفحهٔ ماژول فعال کنید",
+    "ar": "حُفظ كمسودة؛ فعّله من صفحة الوحدة"
+  },
+  "Run Test connection first; the entry must be reachable and recognized.": {
+    "fa": "ابتدا «آزمون اتصال» را اجرا کنید؛ ورودی باید در دسترس و شناخته‌شده باشد.",
+    "ar": "شغّل اختبار الاتصال أولًا؛ يجب أن يكون المدخل متاحًا ومعروفًا."
+  },
+  "General": {
+    "fa": "اطلاعات عمومی",
+    "ar": "معلومات عامة"
+  },
+  "Network": {
+    "fa": "شبکه",
+    "ar": "الشبكة"
+  },
+  "Manifests": {
+    "fa": "مانیفست‌ها",
+    "ar": "ملفات التعريف"
+  },
+  "Validate & activate": {
+    "fa": "اعتبارسنجی و فعال‌سازی",
+    "ar": "التحقق والتفعيل"
+  },
+  "Register a new version of {module}": {
+    "fa": "ثبت نسخهٔ جدید {module}",
+    "ar": "تسجيل إصدار جديد من {module}"
+  },
+  "Register micro-frontend": {
+    "fa": "ثبت میکروفرانت",
+    "ar": "تسجيل واجهة مصغرة"
+  },
+  "Back": {
+    "fa": "قبلی",
+    "ar": "السابق"
+  },
+  "Next": {
+    "fa": "بعدی",
+    "ar": "التالي"
+  },
+  "Validate": {
+    "fa": "اعتبارسنجی",
+    "ar": "تحقق"
+  },
+  "Save draft": {
+    "fa": "ذخیرهٔ پیش‌نویس",
+    "ar": "حفظ كمسودة"
+  },
+  "Publish & activate": {
+    "fa": "انتشار و فعال‌سازی",
+    "ar": "نشر وتفعيل"
+  },
+  "Micro-frontend registered and active": {
+    "fa": "میکروفرانت ثبت و فعال شد",
+    "ar": "تم تسجيل الواجهة المصغرة وتفعيلها"
+  },
+  "Micro-frontend saved as draft": {
+    "fa": "میکروفرانت به‌صورت پیش‌نویس ذخیره شد",
+    "ar": "حُفظت الواجهة المصغرة كمسودة"
+  },
+  "Open module {module}": {
+    "fa": "باز کردن ماژول {module}",
+    "ar": "فتح الوحدة {module}"
+  },
+  "Lowercase letters, digits and dashes": {
+    "fa": "حروف کوچک، رقم و خط تیره",
+    "ar": "أحرف صغيرة وأرقام وشرطات"
+  },
+  "Icon": {
+    "fa": "آیکن",
+    "ar": "الأيقونة"
+  },
+  "Letters, digits, dash or underscore": {
+    "fa": "حرف، رقم، خط تیره یا زیرخط",
+    "ar": "أحرف أو أرقام أو شرطة أو شرطة سفلية"
+  },
+  "Active after registration": {
+    "fa": "فعال پس از ثبت",
+    "ar": "نشط بعد التسجيل"
+  },
+  "Draft (activate later)": {
+    "fa": "پیش‌نویس (فعال‌سازی بعدی)",
+    "ar": "مسودة (تفعيل لاحقًا)"
+  },
+  "Environment": {
+    "fa": "محیط",
+    "ar": "البيئة"
+  },
+  "production": {
+    "fa": "عملیاتی",
+    "ar": "الإنتاج"
+  },
+  "staging": {
+    "fa": "پیش‌عملیاتی",
+    "ar": "ما قبل الإنتاج"
+  },
+  "test": {
+    "fa": "آزمون",
+    "ar": "الاختبار"
+  },
+  "development": {
+    "fa": "توسعه",
+    "ar": "التطوير"
+  },
+  "Host and port": {
+    "fa": "میزبان و پورت",
+    "ar": "المضيف والمنفذ"
+  },
+  "Full URL": {
+    "fa": "نشانی کامل",
+    "ar": "العنوان الكامل"
+  },
+  "Entry URL": {
+    "fa": "نشانی ورودی",
+    "ar": "عنوان المدخل"
+  },
+  "Protocol": {
+    "fa": "پروتکل",
+    "ar": "البروتوكول"
+  },
+  "Hostname or IP address": {
+    "fa": "نام میزبان یا IP",
+    "ar": "اسم المضيف أو عنوان IP"
+  },
+  "Port": {
+    "fa": "پورت",
+    "ar": "المنفذ"
+  },
+  "Base path": {
+    "fa": "مسیر پایه",
+    "ar": "المسار الأساسي"
+  },
+  "Entry file": {
+    "fa": "فایل ورودی",
+    "ar": "ملف المدخل"
+  },
+  "Validate address": {
+    "fa": "اعتبارسنجی نشانی",
+    "ar": "التحقق من العنوان"
+  },
+  "Test connection": {
+    "fa": "آزمون اتصال",
+    "ar": "اختبار الاتصال"
+  },
+  "Check runtime compatibility": {
+    "fa": "بررسی سازگاری اجرایی",
+    "ar": "فحص توافق التشغيل"
+  },
+  "Fetch manifest": {
+    "fa": "دریافت مانیفست",
+    "ar": "جلب ملف التعريف"
+  },
+  "Reachable: {format}, {size} bytes": {
+    "fa": "در دسترس: {format}، {size} بایت",
+    "ar": "متاح: {format}، {size} بايت"
+  },
+  "address valid": {
+    "fa": "نشانی معتبر",
+    "ar": "العنوان صالح"
+  },
+  "The address cannot be registered yet; see the failed check below.": {
+    "fa": "این نشانی هنوز قابل ثبت نیست؛ بررسی ناموفق زیر را ببینید.",
+    "ar": "لا يمكن تسجيل العنوان بعد؛ راجع الفحص الفاشل أدناه."
+  },
+  "Browsers never contact this address: Hive serves the registered files from its own origin (/api/mfe/…), so no proxy rule or rebuild is needed.": {
+    "fa": "مرورگرها هرگز به این نشانی وصل نمی‌شوند: کندو فایل‌ها را از مبدأ خودش (/api/mfe/…) ارائه می‌کند؛ نیازی به قاعدهٔ پراکسی یا ساخت مجدد نیست.",
+    "ar": "لا تتصل المتصفحات بهذا العنوان: يقدّم هايف الملفات من أصله (/api/mfe/…) دون قاعدة وكيل أو إعادة بناء."
+  },
+  "Runtime format": {
+    "fa": "قالب اجرایی",
+    "ar": "تنسيق التشغيل"
+  },
+  "Detected: {format}": {
+    "fa": "تشخیص داده شد: {format}",
+    "ar": "المكتشف: {format}"
+  },
+  "Hive ES module": {
+    "fa": "ماژول ES کندو",
+    "ar": "وحدة ES لهايف"
+  },
+  "Webpack Module Federation": {
+    "fa": "Module Federation وب‌پک",
+    "ar": "Module Federation من Webpack"
+  },
+  "Vite Module Federation": {
+    "fa": "Module Federation وایت",
+    "ar": "Module Federation من Vite"
+  },
+  "Style isolation": {
+    "fa": "جداسازی استایل",
+    "ar": "عزل الأنماط"
+  },
+  "Container name (webpack remote name)": {
+    "fa": "نام کانتینر (نام remote در وب‌پک)",
+    "ar": "اسم الحاوية (اسم remote في Webpack)"
+  },
+  "Exposed module": {
+    "fa": "ماژول ارائه‌شده",
+    "ar": "الوحدة المكشوفة"
+  },
+  "Every format must provide the Hive micro-app contract": {
+    "fa": "هر قالب باید قرارداد میکرواپ کندو را ارائه کند",
+    "ar": "يجب أن يوفر كل تنسيق عقد التطبيق المصغر لهايف"
+  },
+  "ES module: export default {contractVersion, create()}. Module Federation: the exposed module default-exports the same object. Integrity is computed from the served bytes and verified on every load.": {
+    "fa": "ماژول ES: ‏export default {contractVersion, create()}. ‏Module Federation: ماژول ارائه‌شده همین شیء را export default می‌کند. صحت (Integrity) از بایت‌های ارائه‌شده محاسبه و در هر بارگذاری بررسی می‌شود.",
+    "ar": "وحدة ES: ‏export default {contractVersion, create()}. ‏Module Federation: تصدّر الوحدة المكشوفة الكائن نفسه. تُحسب السلامة من البايتات وتُتحقق في كل تحميل."
+  },
+  "Integrity": {
+    "fa": "صحت (SRI)",
+    "ar": "السلامة (SRI)"
+  },
+  "Artifact version": {
+    "fa": "نسخهٔ آرتیفکت",
+    "ar": "إصدار الحزمة"
+  },
+  "major.minor.patch": {
+    "fa": "major.minor.patch",
+    "ar": "major.minor.patch"
+  },
+  "Routes (micro-frontend manifest)": {
+    "fa": "مسیرها (مانیفست میکروفرانت)",
+    "ar": "المسارات (ملف تعريف الواجهة المصغرة)"
+  },
+  "Fetched from the micro-frontend": {
+    "fa": "دریافت‌شده از میکروفرانت",
+    "ar": "مجلوب من الواجهة المصغرة"
+  },
+  "Define routes here": {
+    "fa": "تعریف مسیرها در همین‌جا",
+    "ar": "عرّف المسارات هنا"
+  },
+  "Paste JSON": {
+    "fa": "چسباندن JSON",
+    "ar": "لصق JSON"
+  },
+  "Use the inspected address, format and integrity for the artifact": {
+    "fa": "استفاده از نشانی، قالب و صحت بررسی‌شده برای آرتیفکت",
+    "ar": "استخدم العنوان والتنسيق والسلامة المفحوصة للحزمة"
+  },
+  "key": {
+    "fa": "کلید",
+    "ar": "المفتاح"
+  },
+  "Menu label": {
+    "fa": "عنوان منو",
+    "ar": "عنوان القائمة"
+  },
+  "resource key": {
+    "fa": "کلید منبع",
+    "ar": "مفتاح المورد"
+  },
+  "Add route": {
+    "fa": "افزودن مسیر",
+    "ar": "إضافة مسار"
+  },
+  "Resources (resource manifest)": {
+    "fa": "منابع (مانیفست منابع)",
+    "ar": "الموارد (ملف تعريف الموارد)"
+  },
+  "Keep published revision {version}": {
+    "fa": "حفظ نسخهٔ منتشرشدهٔ {version}",
+    "ar": "الإبقاء على المراجعة المنشورة {version}"
+  },
+  "None — define resources manually": {
+    "fa": "هیچ — تعریف دستی منابع",
+    "ar": "لا شيء — عرّف الموارد يدويًا"
+  },
+  "Resource hierarchy preview": {
+    "fa": "پیش‌نمایش سلسله‌مراتب منابع",
+    "ar": "معاينة تسلسل الموارد"
+  },
+  "Create resources referenced by routes but not declared (as manual resources)": {
+    "fa": "ایجاد منابعی که مسیرها به آن‌ها ارجاع می‌دهند اما تعریف نشده‌اند (به‌صورت دستی)",
+    "ar": "إنشاء الموارد التي تشير إليها المسارات وغير المعرّفة (كموارد يدوية)"
+  },
+  "Preview registration": {
+    "fa": "پیش‌نمایش ثبت",
+    "ar": "معاينة التسجيل"
+  },
+  "Validation": {
+    "fa": "اعتبارسنجی",
+    "ar": "التحقق"
+  },
+  "Progress": {
+    "fa": "پیشرفت",
+    "ar": "التقدم"
+  },
+  "Entry": {
+    "fa": "ورودی",
+    "ar": "المدخل"
+  },
+  "Resulting hierarchy": {
+    "fa": "سلسله‌مراتب حاصل",
+    "ar": "التسلسل الناتج"
+  },
+  "Potential impact": {
+    "fa": "اثر احتمالی",
+    "ar": "الأثر المحتمل"
+  },
+  "{count} existing grants require review": {
+    "fa": "{count} مجوز موجود نیاز به بازبینی دارد",
+    "ar": "{count} صلاحيات قائمة تحتاج إلى مراجعة"
+  },
+  "No existing grant is affected": {
+    "fa": "هیچ مجوز موجودی تحت تأثیر نیست",
+    "ar": "لا تتأثر أي صلاحية قائمة"
+  },
+  "Bind route {route} to a resource": {
+    "fa": "اتصال مسیر {route} به یک منبع",
+    "ar": "ربط المسار {route} بمورد"
+  },
+  "Save as new version": {
+    "fa": "ذخیره به‌عنوان نسخهٔ جدید",
+    "ar": "حفظ كإصدار جديد"
+  },
+  "Existing resource": {
+    "fa": "منبع موجود",
+    "ar": "مورد قائم"
+  },
+  "New manual resource": {
+    "fa": "منبع دستی جدید",
+    "ar": "مورد يدوي جديد"
+  },
+  "Activate the new version": {
+    "fa": "فعال‌سازی نسخهٔ جدید",
+    "ar": "تفعيل الإصدار الجديد"
+  },
+  "Change address / new version": {
+    "fa": "تغییر نشانی / نسخهٔ جدید",
+    "ar": "تغيير العنوان / إصدار جديد"
+  },
+  "Deactivate this module? It disappears from runtime contexts and can no longer be mounted.": {
+    "fa": "این ماژول غیرفعال شود؟ از زمینهٔ اجرا حذف می‌شود و دیگر قابل بارگذاری نیست.",
+    "ar": "تعطيل هذه الوحدة؟ ستختفي من سياقات التشغيل ولن يمكن تحميلها."
+  },
+  "This module is MANUAL: resources are managed in the resource tree, not by manifests.": {
+    "fa": "این ماژول دستی است: منابع در درخت منابع مدیریت می‌شوند، نه با مانیفست.",
+    "ar": "هذه الوحدة يدوية: تُدار الموارد في الشجرة لا بملفات التعريف."
+  },
+  "Discard": {
+    "fa": "حذف پیش‌نویس",
+    "ar": "تجاهل المسودة"
+  },
+  "Roll back": {
+    "fa": "بازگشت به این نسخه",
+    "ar": "الرجوع إلى هذا الإصدار"
+  },
+  "Navigation routes of the active artifact and the resources they require. Backend API routes are configured separately under Proxy routes.": {
+    "fa": "مسیرهای منوی آرتیفکت فعال و منابع موردنیازشان. مسیرهای API سمت سرور جداگانه در «مسیرهای واسط» تنظیم می‌شوند.",
+    "ar": "مسارات التنقل للحزمة النشطة والموارد التي تتطلبها. تُضبط مسارات واجهات الخادم بشكل منفصل ضمن مسارات الوكيل."
+  },
+  "Bind resource": {
+    "fa": "اتصال منبع",
+    "ar": "ربط مورد"
+  },
+  "OK": {
+    "fa": "درست",
+    "ar": "سليم"
+  },
+  "NO_RESOURCE": {
+    "fa": "بدون منبع",
+    "ar": "بلا مورد"
+  },
+  "RESOURCE_MISSING": {
+    "fa": "منبع ناموجود",
+    "ar": "المورد غير موجود"
+  },
+  "ACTION_UNDECLARED": {
+    "fa": "عملیات تعریف‌نشده",
+    "ar": "إجراء غير معرّف"
+  },
+  "RESOURCE_ARCHIVED": {
+    "fa": "منبع بایگانی‌شده",
+    "ar": "مورد مؤرشف"
+  },
+  "PASS": {
+    "fa": "موفق",
+    "ar": "ناجح"
+  },
+  "FAIL": {
+    "fa": "ناموفق",
+    "ar": "فاشل"
+  },
+  "WARN": {
+    "fa": "هشدار",
+    "ar": "تحذير"
+  },
+  "SKIP": {
+    "fa": "رد شد",
+    "ar": "تخطٍ"
+  },
+  "ok": {
+    "fa": "انجام شد",
+    "ar": "تم"
+  },
+  "error": {
+    "fa": "خطا",
+    "ar": "خطأ"
+  },
+  "skipped": {
+    "fa": "انجام نشد",
+    "ar": "تم التخطي"
+  },
+  "address": {
+    "fa": "نشانی",
+    "ar": "العنوان"
+  },
+  "policy": {
+    "fa": "سیاست شبکه",
+    "ar": "سياسة الشبكة"
+  },
+  "reachability": {
+    "fa": "دسترس‌پذیری",
+    "ar": "إمكانية الوصول"
+  },
+  "http": {
+    "fa": "پاسخ HTTP",
+    "ar": "استجابة HTTP"
+  },
+  "contentType": {
+    "fa": "نوع محتوا",
+    "ar": "نوع المحتوى"
+  },
+  "format": {
+    "fa": "قالب",
+    "ar": "التنسيق"
+  },
+  "integrity": {
+    "fa": "صحت",
+    "ar": "السلامة"
+  },
+  "mfManifest": {
+    "fa": "مانیفست میکروفرانت",
+    "ar": "ملف تعريف الواجهة"
+  },
+  "resourceManifest": {
+    "fa": "مانیفست منابع",
+    "ar": "ملف تعريف الموارد"
+  },
+  "remoteName": {
+    "fa": "نام کانتینر",
+    "ar": "اسم الحاوية"
+  },
+  "manifest": {
+    "fa": "مانیفست",
+    "ar": "ملف التعريف"
+  },
+  "identity": {
+    "fa": "هویت مانیفست",
+    "ar": "هوية ملف التعريف"
+  },
+  "routes": {
+    "fa": "مسیرها",
+    "ar": "المسارات"
+  },
+  "resources": {
+    "fa": "منابع",
+    "ar": "الموارد"
+  },
+  "artifact": {
+    "fa": "آرتیفکت",
+    "ar": "الحزمة"
+  },
+  "DIRECT_USER": {
+    "fa": "مجوز مستقیم کاربر",
+    "ar": "صلاحية مباشرة للمستخدم"
+  },
+  "GROUP": {
+    "fa": "از طریق گروه",
+    "ar": "عبر مجموعة"
+  },
+  "ROLE": {
+    "fa": "از طریق نقش",
+    "ar": "عبر دور"
+  },
+  "ROLE_VIA_GROUP": {
+    "fa": "نقش از طریق گروه",
+    "ar": "دور عبر مجموعة"
+  },
+  "NO_RELATIONSHIP": {
+    "fa": "بدون رابطهٔ مجوز",
+    "ar": "لا توجد علاقة تفويض"
+  },
+  "USER_UNKNOWN_OR_INACTIVE": {
+    "fa": "کاربر ناشناخته یا غیرفعال",
+    "ar": "مستخدم غير معروف أو غير نشط"
   }
 }

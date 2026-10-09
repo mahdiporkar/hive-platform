@@ -58,10 +58,16 @@ export function validateDocument(document,{artifactFile}={}) {
  try{warnings.push(...checkCompatibility(document).map(w=>({code:w.code,message:w.message})));}catch(e){error(e.diagnostic?.code??'VERSION_INVALID',e.message);}
  if(typeof document.displayName!=='string'||!document.displayName.trim())error('MANIFEST_INVALID','displayName is required');
  const artifact=document.artifact??{};
- if(artifact.format!=='ES_MODULE')error('MODULE_FORMAT_UNSUPPORTED',`artifact.format must be ES_MODULE, received ${artifact.format}`);
+ if(!['ES_MODULE','WEBPACK_FEDERATION','VITE_FEDERATION'].includes(artifact.format))error('MODULE_FORMAT_UNSUPPORTED',`artifact.format must be ES_MODULE, WEBPACK_FEDERATION or VITE_FEDERATION, received ${artifact.format}`);
+ else if(artifact.format==='ES_MODULE'){if(artifact.remoteName!==undefined||artifact.exposedModule!==undefined)error('MANIFEST_INVALID','artifact.remoteName and artifact.exposedModule apply only to Module Federation formats');}
+ else {
+  if(artifact.format==='WEBPACK_FEDERATION'&&!/^[A-Za-z_$][A-Za-z0-9_$]{0,79}$/.test(artifact.remoteName??''))error('MANIFEST_INVALID','artifact.remoteName (the webpack container global) is required for WEBPACK_FEDERATION');
+  if(!/^\.\/[A-Za-z0-9._/-]{1,200}$/.test(artifact.exposedModule??'')||artifact.exposedModule.includes('..'))error('MANIFEST_INVALID',`artifact.exposedModule (e.g. ./plugin) is required for ${artifact.format}`);
+ }
  if(typeof artifact.url!=='string')error('MANIFEST_INVALID','artifact.url is required');
  else if(artifact.url.startsWith('/')){if(artifact.url.startsWith('//')||!artifact.url.toLowerCase().endsWith('.js')||/[\\?#]|\/\.\.?\/|%2e|%2f|%5c/i.test(artifact.url))error('MANIFEST_INVALID','artifact.url path must be a normalized same-origin .js path');}
- else if(!/^https:\/\/[^/@\s]+\/\S+\.js$/i.test(artifact.url))error('ARTIFACT_LOCATION_REJECTED','artifact.url must be HTTPS (or a same-origin path) ending in .js; network policy is applied by the server');
+ else if(!/^https?:\/\/[^/@\s]+\/\S+\.js$/i.test(artifact.url))error('ARTIFACT_LOCATION_REJECTED','artifact.url must be an HTTP(S) URL (or a same-origin path) ending in .js; network policy is applied by the server');
+ else if(artifact.url.startsWith('http:'))warnings.push({code:'ARTIFACT_HTTP',message:'artifact.url uses plain HTTP: accepted only where the artifact network policy allows it (browsers load it through the same-origin artifact gateway)'});
  if(typeof artifact.integrity!=='string')error('INTEGRITY_REQUIRED','artifact.integrity (SRI) is required');
  else if(!SRI.test(artifact.integrity))error('MANIFEST_INVALID','artifact.integrity must be a sha256/384/512 SRI value');
  if(document.styleIsolation!==undefined&&!['SCOPED','SHADOW_DOM'].includes(document.styleIsolation))error('MANIFEST_INVALID','styleIsolation must be SCOPED or SHADOW_DOM');

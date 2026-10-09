@@ -38,6 +38,7 @@ class OpaqueRequestBodyTest {
   @MockitoBean TokenRefresh refresh;
   @MockitoBean io.hiveplatform.bff.proxy.SecretResolver secrets;
   @MockitoBean org.springframework.data.redis.core.StringRedisTemplate redis;
+  @MockitoBean io.hiveplatform.bff.mfe.ArtifactGateway artifacts;
 
   @Test
   void noMultipartResolverOrFormContentFilterParsesBodiesBeforeTheProxy() {

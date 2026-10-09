@@ -35,6 +35,15 @@ class SecurityConfigurationTest {
   @MockitoBean TokenRefresh refresh;
   @MockitoBean io.hiveplatform.bff.proxy.SecretResolver secrets;
   @MockitoBean org.springframework.data.redis.core.StringRedisTemplate redis;
+  @MockitoBean io.hiveplatform.bff.mfe.ArtifactGateway artifacts;
+
+  @Test
+  void artifactGatewayIsAnonymousCapableAndDecidesPerModule() throws Exception {
+    org.mockito.Mockito.when(artifacts.serve("reports", "1.0.0", "remoteEntry.js", null))
+        .thenReturn(new io.hiveplatform.bff.mfe.ArtifactGateway.Asset("text/javascript", "var x;".getBytes(), "\"e\""));
+    mvc.perform(get("/api/mfe/reports/1.0.0/remoteEntry.js")).andExpect(status().isOk())
+        .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("X-Content-Type-Options", "nosniff"));
+  }
 
   @Test void anonymousPrivateRequestIsDenied() throws Exception { mvc.perform(get("/api/me/context")).andExpect(status().isUnauthorized()); }
   @Test void forgedActorHeadersCannotGrantAccess() throws Exception { mvc.perform(get("/api/admin/applications").header("X-Hive-Actor", "00000000-0000-0000-0000-000000000000")).andExpect(status().isUnauthorized()); }

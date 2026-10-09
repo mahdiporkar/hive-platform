@@ -68,14 +68,29 @@ public class RuntimeCatalog {
       }
       routes.sort(Comparator.comparing((RuntimeRoute r) -> r.navigation() == null || r.navigation().order() == null ? Integer.MAX_VALUE : r.navigation().order()).thenComparing(RuntimeRoute::key));
       var artifact = new HashMap<String, String>();
-      artifact.put("url", manifest.artifact().url());
+      artifact.put("url", browserUrl(row.module(), manifest.manifestVersion(), manifest.artifact().url()));
       artifact.put("integrity", manifest.artifact().integrity());
       artifact.put("format", manifest.artifact().format());
+      if (manifest.artifact().remoteName() != null) artifact.put("remoteName", manifest.artifact().remoteName());
+      if (manifest.artifact().exposedModule() != null) artifact.put("exposedModule", manifest.artifact().exposedModule());
       modules.add(new RuntimeModule(row.app(), row.module(), row.name(), manifest.schemaVersion(), manifest.manifestVersion(), manifest.contractVersion(),
           manifest.runtimeVersion(), artifact, manifest.styleIsolation(), routes));
     }
     return new Snapshot(revision, applications, modules);
   }
+
+  /**
+   * Browsers load upstream (absolute) artifacts only through the BFF artifact gateway, from a stable same-origin and
+   * version-scoped path; the registered network address never leaves the platform. Same-origin paths are unchanged.
+   * Chunks and stylesheets the entry loads relative to itself resolve below the same gateway path.
+   */
+  static String browserUrl(String moduleKey, String version, String url) {
+    if (!url.startsWith("http://") && !url.startsWith("https://")) return url;
+    String path = java.net.URI.create(url).getRawPath();
+    return GATEWAY_PREFIX + moduleKey + "/" + version + "/" + path.substring(path.lastIndexOf('/') + 1);
+  }
+
+  public static final String GATEWAY_PREFIX = "/api/mfe/";
 
   private JsonNode read(String value) {
     try {

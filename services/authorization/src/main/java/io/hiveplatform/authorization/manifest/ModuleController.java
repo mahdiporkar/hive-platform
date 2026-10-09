@@ -19,20 +19,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @PlatformAccess(Relation.OPERATOR)
 class ModuleController {
-  record FetchRequest(String url) {}
+  record FetchRequest(String url, Boolean pinIntegrity) {}
   record ValidateRequest(String kind, JsonNode document) {}
 
   private final ModuleRegistry registry;
   private final ManifestDocuments documents;
   private final RuntimeCatalog runtime;
   private final RuntimeContexts contexts;
+  private final ArtifactInspector inspector;
+  private final ResourceTree tree;
 
-  ModuleController(ModuleRegistry registry, ManifestDocuments documents, RuntimeCatalog runtime, RuntimeContexts contexts) {
+  ModuleController(ModuleRegistry registry, ManifestDocuments documents, RuntimeCatalog runtime, RuntimeContexts contexts, ArtifactInspector inspector, ResourceTree tree) {
     this.contexts = contexts;
     this.registry = registry;
     this.documents = documents;
     this.runtime = runtime;
+    this.inspector = inspector;
+    this.tree = tree;
   }
+
+  /** Registration wizard: validates an address and inspects the entry served there (no state is changed). */
+  @PostMapping("/admin/modules/probe") ArtifactInspector.ProbeResult probe(@RequestBody ArtifactInspector.ProbeRequest request) { return inspector.probe(request); }
+
+  @GetMapping("/admin/modules/{module}/routes")
+  List<ResourceTree.RouteRef> routes(@PathVariable String module, @RequestParam(required = false) String version) { return tree.moduleRoutes(module, version); }
+
+  @GetMapping("/admin/applications/{key}/resource-tree")
+  ResourceTree.Tree resourceTree(@PathVariable String key, @RequestParam(defaultValue = "false") boolean includeArchived) { return tree.tree(key, includeArchived); }
 
   @GetMapping("/admin/modules") List<ModuleRegistry.Module> modules(@RequestParam(required = false) String applicationKey) { return registry.modules(applicationKey); }
   @PostMapping("/admin/modules") ModuleRegistry.Module create(@RequestBody ModuleRegistry.NewModule module) { return registry.create(module); }
@@ -67,14 +80,15 @@ class ModuleController {
   @GetMapping("/admin/modules/{module}/artifacts") List<ModuleRegistry.ArtifactRevision> artifacts(@PathVariable String module) { return registry.artifacts(module); }
 
   @PostMapping("/admin/modules/{module}/artifacts")
-  ResponseEntity<ModuleRegistry.ImportResult<ModuleRegistry.ArtifactRevision>> registerArtifact(@PathVariable String module, @RequestBody JsonNode document) {
-    var result = registry.registerArtifact(module, document, "UPLOAD", null);
+  ResponseEntity<ModuleRegistry.ImportResult<ModuleRegistry.ArtifactRevision>> registerArtifact(@PathVariable String module, @RequestBody JsonNode document,
+      @RequestParam(defaultValue = "false") boolean pinIntegrity) {
+    var result = registry.registerArtifact(module, document, "UPLOAD", null, pinIntegrity);
     return ResponseEntity.status(result.created() ? HttpStatus.CREATED : HttpStatus.OK).body(result);
   }
 
   @PostMapping("/admin/modules/{module}/artifacts/fetch")
   ResponseEntity<ModuleRegistry.ImportResult<ModuleRegistry.ArtifactRevision>> fetchArtifact(@PathVariable String module, @RequestBody(required = false) FetchRequest request) {
-    var result = registry.fetchArtifact(module, request == null ? null : request.url());
+    var result = registry.fetchArtifact(module, request == null ? null : request.url(), request != null && Boolean.TRUE.equals(request.pinIntegrity()));
     return ResponseEntity.status(result.created() ? HttpStatus.CREATED : HttpStatus.OK).body(result);
   }
 
@@ -105,4 +119,23 @@ class ModuleController {
   @GetMapping("/internal/runtime/catalog") RuntimeCatalog.Snapshot snapshot() { return runtime.snapshot(); }
   @GetMapping("/internal/runtime/public-context") RuntimeContexts.PublicContext publicContext() { return contexts.publicContext(); }
   @GetMapping("/internal/runtime/context") RuntimeContexts.UserContext context(@RequestParam java.util.UUID userId) { return contexts.userContext(userId); }
+
+  /**
+   * Artifact gateway resolution (BFF only): the upstream location of a module's active artifact, answered only when the
+   * module is part of the caller's runtime context. Unknown, deactivated and invisible modules are indistinguishable.
+   */
+  @GetMapping("/internal/runtime/artifacts/{module}")
+  ResponseEntity<Map<String, Object>> artifact(@PathVariable String module, @RequestParam(required = false) java.util.UUID userId) {
+    var target = registry.artifactTarget(module);
+    if (target.isEmpty() || !contexts.exposes(module, userId)) return ResponseEntity.notFound().build();
+    var t = target.get();
+    var body = new java.util.LinkedHashMap<String, Object>();
+    body.put("moduleKey", t.moduleKey());
+    body.put("manifestVersion", t.manifestVersion());
+    body.put("url", t.url());
+    body.put("integrity", t.integrity());
+    body.put("format", t.format());
+    body.put("revision", registry.runtimeRevision());
+    return ResponseEntity.ok(body);
+  }
 }

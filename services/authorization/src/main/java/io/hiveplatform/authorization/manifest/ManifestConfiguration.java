@@ -34,4 +34,9 @@ class ManifestConfiguration {
   ManifestFetcher manifestFetcher(UiArtifactUriPolicy policy, ObjectMapper json) {
     return new ManifestFetcher(policy, json);
   }
+
+  @Bean
+  ArtifactInspector artifactInspector(UiArtifactUriPolicy policy, ManifestFetcher fetcher, ManifestDocuments documents) {
+    return new ArtifactInspector(policy, fetcher, documents);
+  }
 }

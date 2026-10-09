@@ -117,7 +117,8 @@ test('golden path: clean install → administration → login → runtime → ev
  assert.equal(denied.status,403);assert.equal(denied.body.code,'ACCESS_DENIED');
  // 22. Audit entry. 23. API log entry.
  let audit=[],logs=[];
- for(let i=0;i<60&&!(audit.some(e=>e.eventType==='route.invoked')&&logs.some(l=>l.outcome==='DENIED'));i++){
+ // Wait for everything asserted below: audit and API log are read separately, so a batch can land between the two reads.
+ for(let i=0;i<60&&!(audit.some(e=>e.eventType==='route.invoked')&&audit.some(e=>e.eventType==='route.denied')&&logs.some(l=>l.outcome==='DENIED'));i++){
   audit=await ok('GET','/audit?eventType=route.&limit=50');logs=await ok('GET','/api-logs?routeKey=finance&limit=50');await pause(250);
  }
  assert.ok(audit.some(e=>e.eventType==='route.invoked'&&e.actorId===`user:${learner.id}`),'audit: protected call');

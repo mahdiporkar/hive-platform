@@ -142,12 +142,26 @@ export function Shell() {
       }
       let current = context;
       setState({engine, context, registry});
-      Object.assign(window, {hiveShell: {engine, registry, diagnostics, get context() { return current; }}});
       window.addEventListener('hive:context', event => {
         current = (event as CustomEvent<AnyHiveContext>).detail;
         void engine.setContext(current);
         setState(previous => previous && {...previous, context: current});
       });
+      // Administrative changes (activation, rollback, deactivation, grants) reach open sessions without a new login:
+      // the context is re-read on focus and periodically, and applied only when it actually changed.
+      const fingerprint = (c: AnyHiveContext) => JSON.stringify([c.authenticated, c.revision, c.modules, 'permissions' in c ? c.permissions : null]);
+      let refreshing = false;
+      const refresh = async () => {
+        if (refreshing) return;
+        refreshing = true;
+        try {
+          const next = await auth.currentContext();
+          if (fingerprint(next) !== fingerprint(current)) window.dispatchEvent(new CustomEvent('hive:context', {detail: next}));
+        } catch { /* keep the current context; the next refresh retries */ } finally { refreshing = false; }
+      };
+      window.addEventListener('focus', () => void refresh());
+      setInterval(() => void refresh(), 60000);
+      Object.assign(window, {hiveShell: {engine, registry, diagnostics, refresh, get context() { return current; }}});
       document.body.setAttribute('data-hive-ready', 'true');
     })().catch(e => setError(String(e)));
   }, []);

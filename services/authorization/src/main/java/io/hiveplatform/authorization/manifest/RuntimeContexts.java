@@ -76,6 +76,15 @@ public class RuntimeContexts {
     return new UserContext(snapshot.revision(), snapshot.applications().stream().filter(a -> keys.contains(a.key())).toList(), modules, permissions, platformRoles);
   }
 
+  /**
+   * Whether a module is part of the caller's runtime context (public context for anonymous callers). The artifact
+   * gateway serves a module's files only to callers that can mount it.
+   */
+  public boolean exposes(String moduleKey, UUID userId) {
+    var modules = userId == null ? publicContext().modules() : userContext(userId).modules();
+    return modules.stream().anyMatch(m -> m.moduleKey().equals(moduleKey));
+  }
+
   private static boolean allowed(Map<String, List<String>> permissions, String application, String resource, String action) {
     var actions = permissions.getOrDefault(application + ":" + resource, List.of());
     return actions.contains(action) || actions.contains(Graph.MANAGE);

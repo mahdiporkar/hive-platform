@@ -27,6 +27,7 @@ class AccessController {
   record Revision(long revision) {}
   record SubjectReference(String subject) {}
   record PlatformRoleRequest(String role, String subject) {}
+  record InspectRequest(UUID userId, String applicationKey, String resourceKey) {}
 
   private final AccessAdministration access;
 
@@ -57,6 +58,16 @@ class AccessController {
   }
 
   @GetMapping("/grants") List<AccessAdministration.Grant> grants(@RequestParam Map<String, String> filter) { return access.grants(filter); }
+
+  @GetMapping("/applications/{application}/resources/{resource}/access")
+  AccessAdministration.ResourceAccess resourceAccess(@PathVariable String application, @PathVariable String resource) { return access.resourceAccess(application, resource); }
+
+  /** Read-only inspection (POST for its body): authoritative decisions plus the relational paths that explain them. */
+  @PostMapping("/access/inspect")
+  @PlatformAccess(Relation.READER)
+  AccessAdministration.Inspection inspect(@RequestBody InspectRequest request) {
+    return access.inspect(request.userId(), request.applicationKey(), request.resourceKey());
+  }
   @PostMapping("/grants") AccessAdministration.Grant grant(@RequestBody AccessAdministration.NewGrant grant) { return access.grant(grant); }
 
   @DeleteMapping("/grants/{id}")

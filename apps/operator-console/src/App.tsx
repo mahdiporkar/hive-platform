@@ -7,6 +7,7 @@ import type {HiveContext, PlatformRole} from '@hive-platform/contracts';
 import {errorText, http, loadContext} from './api';
 import {ApiLogsPage, AuditPage} from './pages/Logs';
 import {ApplicationDetailPage, ApplicationsPage, ModuleDetailPage, ModulesPage} from './pages/Catalog';
+import {ResourceManagementPage} from './pages/Resources';
 import {DiagnosticsPage, FlagsPage, LegacyProfilesPage, RoutesPage, SupersetPage, TargetsPage} from './pages/Integration';
 import {GrantsPage, GroupsPage, IdentityProvidersPage, PlatformRolesPage, RolesPage, UsersPage} from './pages/Security';
 
@@ -15,6 +16,7 @@ const SECTIONS: {key: string; label: string; roles: PlatformRole[]}[] = [
   {key: '/diagnostics', label: "Diagnostics", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/applications', label: "Applications", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/modules', label: "Micro apps & manifests", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
+  {key: '/resources', label: "Resource management", roles: ['OPERATOR', 'SECURITY_ADMIN', 'INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/users', label: "Users", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/groups', label: "Groups", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
   {key: '/roles', label: "Roles", roles: ['SECURITY_ADMIN', 'OPERATOR', 'INTEGRATION_ADMIN', 'AUDITOR']},
@@ -76,6 +78,7 @@ export function App() {
               <Route path="/applications/:key" element={<ApplicationDetailPage />} />
               <Route path="/modules" element={<ModulesPage />} />
               <Route path="/modules/:key" element={<ModuleDetailPage />} />
+              <Route path="/resources" element={<ResourceManagementPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/groups" element={<GroupsPage />} />
               <Route path="/roles" element={<RolesPage />} />

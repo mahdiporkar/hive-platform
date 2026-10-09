@@ -32,6 +32,10 @@ Both services start in `HIVE_PROFILE=production` unless told otherwise and refus
 
 `HIVE_PROFILE=development` downgrades these to warnings for local evaluation and tests only.
 
+## Micro-frontend hosts
+
+Registered MFE hosts are reached server-side only (BFF artifact gateway, `/api/mfe/**`): no reverse-proxy rule per module. Set once: `HIVE_ARTIFACT_NETWORK_POLICY` / `HIVE_ARTIFACT_ALLOWED_PRIVATE_CIDRS` / `HIVE_ARTIFACT_ALLOW_HTTP` (authorization) and `HIVE_MFE_NETWORK_POLICY` / `HIVE_MFE_ALLOWED_PRIVATE_CIDRS` / `HIVE_MFE_ALLOW_HTTP` (BFF). In the production profile plain HTTP requires `INTERNAL_ENTERPRISE`. See [MFE registration](mfe-registration.md).
+
 ## TLS and proxies
 
 - Terminate TLS in front of the gateway and send `X-Forwarded-Proto`/`X-Forwarded-Host`. The services use `server.forward-headers-strategy=native`: forwarded headers are honored only from internal proxy addresses (Tomcat defaults: 10/8, 172.16/12, 192.168/16, 127/8, link-local), so OAuth redirect URIs and Secure cookies use the public HTTPS origin (tested).

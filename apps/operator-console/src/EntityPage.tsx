@@ -90,7 +90,7 @@ export function CreateButton({label, testId, fields, submit, onDone}: {label: st
 export function EntityPage<T extends object>({title, path, testId, columns, rowKey, create, actions, extra, children}: {
   title: string; path: string | null; testId: string; columns: ColumnsType<T>; rowKey: keyof T | ((row: T) => string);
   create?: {label: string; fields: Field[]; path?: string; transform?: (body: Record<string, unknown>) => unknown};
-  actions?: RowAction<T>[]; extra?: ReactNode; children?: (reload: () => Promise<void>) => ReactNode;
+  actions?: RowAction<T>[]; extra?: ReactNode | ((reload: () => Promise<void>) => ReactNode); children?: (reload: () => Promise<void>) => ReactNode;
 }) {
   const {t} = useI18n();
   const {data, loading, error, reload} = useList<T>(path);
@@ -106,7 +106,7 @@ export function EntityPage<T extends object>({title, path, testId, columns, rowK
     ),
   }] : columns;
   return (
-    <Card title={t(title)} data-testid={`${testId}-page`} extra={<Space>{extra}{create && path &&
+    <Card title={t(title)} data-testid={`${testId}-page`} extra={<Space>{typeof extra === 'function' ? extra(reload) : extra}{create && path &&
       <CreateButton label={create.label} testId={`${testId}-create`} fields={create.fields}
         submit={body => admin.post(create.path ?? path, create.transform ? create.transform(body) : body)} onDone={() => void reload()} />}</Space>}>
       {error && <Alert type="error" message={error} style={{marginBottom: 12}} />}
