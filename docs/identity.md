@@ -38,7 +38,7 @@ HTTPS is mandatory for issuers and endpoints; `HIVE_OIDC_ALLOW_LOCAL_HTTP`/`HIVE
 |---|---|
 | `GET /auth/login?returnUrl=&provider=&tenant=&domain=` | Start login. `returnUrl` must be a local path (no scheme, authority, traversal, backslash, control characters or auth loop). |
 | `GET /auth/csrf` | CSRF header name and token for mutating calls. |
-| `POST /auth/logout` | CSRF-protected; deletes the vault record and invalidates the session. |
+| `POST /auth/logout` | CSRF-protected; deletes the vault record and invalidates the session, then ends the identity provider's session too (OIDC RP-initiated logout): answers `200 {"logoutUrl": …}` with the provider's `end_session_endpoint`, `id_token_hint`, `client_id` and `post_logout_redirect_uri` = this deployment's root, which the browser follows (`@hive-platform/auth` `logout()` does, returning `{redirecting: true}`). `204` when there is no provider session to end (no session, or a provider without an end-session endpoint, such as control-plane providers). Register `<origin>/*` as the client's post-logout redirect URI at the provider. |
 | `GET /api/me/session` | Token-free identity and absolute expiry; refreshes the access token server-side when it is within 15 s of expiry. |
 | `GET/POST/PUT /provisioning/identity/providers` | Machine provisioning of dynamic providers (optimistic `revision`). Also exposed to platform security administrators through the admin API. |
 | `POST /provisioning/identity/aliases` | Explicitly link an additional external identity to a canonical user in the same tenant. |
@@ -46,4 +46,4 @@ HTTPS is mandatory for issuers and endpoints; `HIVE_OIDC_ALLOW_LOCAL_HTTP`/`HIVE
 ## Executed evidence
 
 - `npm run test:identity` — fixture IdP with signed JWTs; PKCE verified at the token endpoint; session-id rotation; cookie flags; 8 concurrent session calls on an expiring token cause exactly one refresh; vault is encrypted and the Redis session hash contains no tokens or OIDC authorities; CSRF-protected logout clears the vault; dynamic provider create/duplicate/unapproved-origin/stale-revision/disabled cases; domain+tenant routing; explicit cross-issuer alias keeps the canonical id; 6 concurrent first logins produce one user; cross-tenant alias rejected; Edge browser login with `returnUrl` and `document.cookie` secrecy; issuer, audience, expiry, nonce and signature faults rejected without creating a session.
-- `npm run test:keycloak` — real Keycloak 26.3.3 login page in Edge; server-side token exchange only; canonical identity synchronized; logout clears vault.
+- `npm run test:keycloak` — real Keycloak 26.3.3 login page in Edge; server-side token exchange only; canonical identity synchronized; full sign-out ends the Keycloak session (the next sign-in shows the credential form), clears the vault, and a sign-out without a session stays local (`204`).

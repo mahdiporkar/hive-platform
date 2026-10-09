@@ -22,4 +22,4 @@ The BFF serves MFE files only for modules in the caller's runtime context, from 
 
 ## Known limits
 
-Micro-apps run in the page's origin; they are trusted code registered by platform operators and pinned by SRI, not sandboxed. CSP allows `blob:` scripts for the verified-import loader and inline styles for shadow roots. Rate limiting and WAF rules belong to the ingress (not provided). RP-initiated IdP logout, mTLS to targets and upstream, and API_KEY/OAUTH2_CLIENT_CREDENTIALS route modes are deferred (explicitly rejected, never stubbed).
+Micro-apps run in the page's origin; they are trusted code registered by platform operators and pinned by SRI, not sandboxed. CSP allows `blob:` scripts for the verified-import loader and inline styles for shadow roots. Rate limiting and WAF rules belong to the ingress (not provided). mTLS to targets and upstream, and API_KEY/OAUTH2_CLIENT_CREDENTIALS route modes are deferred (explicitly rejected, never stubbed).

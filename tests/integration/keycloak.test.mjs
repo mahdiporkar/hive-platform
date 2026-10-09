@@ -39,8 +39,23 @@ test('Keycloak authorization code + PKCE through a real browser yields a token-f
   assert.equal(await probe.evaluate(()=>document.cookie),'','no session material is readable by JavaScript');
   assert.ok(!seen.some(u=>u.includes('/protocol/openid-connect/token')),'token exchange happens server-side only');
   assert.equal(stack.sql(`select count(*) from external_identity where issuer='${issuer}'`),'1','canonical identity synchronized');
-  assert.equal(await probe.evaluate(async()=>{const c=await(await fetch('/auth/csrf')).json();return (await fetch('/auth/logout',{method:'POST',headers:{[c.headerName]:c.token}})).status;}),204);
+  // Full sign-out: Hive's session and tokens, then Keycloak's own session (OIDC RP-initiated logout).
+  const logout=await probe.evaluate(async()=>{const c=await(await fetch('/auth/csrf')).json();const r=await fetch('/auth/logout',{method:'POST',headers:{[c.headerName]:c.token}});return {status:r.status,cache:r.headers.get('cache-control'),body:await r.json()};});
+  assert.equal(logout.status,200);assert.equal(logout.cache,'no-store');
+  const end=new URL(logout.body.logoutUrl);
+  assert.equal(end.origin+end.pathname,`${issuer}/protocol/openid-connect/logout`,"Keycloak's end-session endpoint from discovery");
+  assert.equal(end.searchParams.get('client_id'),'hive-bff');
+  assert.equal(end.searchParams.get('post_logout_redirect_uri'),origin+'/','back to this deployment only');
+  assert.ok(end.searchParams.get('id_token_hint'),'id_token_hint: no confirmation page');
   assert.equal(await probe.evaluate(async()=>(await fetch('/api/me/session')).status),401);
   assert.equal(stack.redis('KEYS','hive:vault:*'),'');
+  await page.goto(logout.body.logoutUrl);
+  await page.waitForURL(u=>u.href.startsWith(origin+'/'),{timeout:30000});
+  // Keycloak's session has ended: signing in again asks for credentials instead of silently re-authenticating.
+  await page.goto(origin+'/auth/login?returnUrl=/workspace');
+  await page.waitForSelector('#username',{timeout:30000});
+  assert.equal(new URL(page.url()).origin,`http://127.0.0.1:${keycloakPort}`);
+  // Without a session there is no provider session to end: the answer stays 204.
+  assert.equal(await probe.evaluate(async()=>{const c=await(await fetch('/auth/csrf')).json();return (await fetch('/auth/logout',{method:'POST',headers:{[c.headerName]:c.token}})).status;}),204);
  }finally{await browser.close();}
 });

@@ -15,8 +15,15 @@ export interface HiveAuth {
  currentContext():Promise<AnyHiveContext>;
  loginUrl(returnUrl?:string, selector?:LoginSelector):string;
  login(returnUrl?:string, selector?:LoginSelector):void;
- logout():Promise<void>;
+ /**
+  * Signs out: ends the Hive session and, when the identity provider supports it, navigates the browser to the
+  * provider's end-session endpoint so its single-sign-on session ends as well (the provider then returns to this
+  * deployment's root). `redirecting` tells the caller the page is leaving: it must not start a new sign-in meanwhile.
+  */
+ logout():Promise<LogoutResult>;
 }
+
+export interface LogoutResult {redirecting:boolean}
 
 /** Mirrors the BFF's validation so consumers never construct an open redirect. */
 export function isSafeReturnUrl(value:string):boolean {
@@ -47,6 +54,13 @@ export function createAuth(http:HiveHttp, options:{navigate?:(url:string)=>void;
   currentContext:async()=>(await context())??await http.get<PublicHiveContext>('/api/public/context'),
   loginUrl,
   login:(returnUrl,selector)=>navigate(loginUrl(returnUrl,selector)),
-  logout:async()=>{await http.post('/auth/logout');http.resetCsrf();},
+  logout:async()=>{
+   const result=await http.post<{logoutUrl?:unknown}|undefined>('/auth/logout');
+   http.resetCsrf();
+   // The BFF names the provider's end-session request; a script cannot follow that cross-origin redirect itself.
+   const url=result&&typeof result==='object'&&typeof result.logoutUrl==='string'?result.logoutUrl:null;
+   if(url&&/^https?:\/\//i.test(url)){navigate(url);return {redirecting:true};}
+   return {redirecting:false};
+  },
  };
 }

@@ -55,7 +55,7 @@ function renderChrome():void {
   link.addEventListener('click',event=>{event.preventDefault();go(route.path);});return link;
  })));
  const button=document.createElement('button');
- if(context.authenticated){user.textContent=context.identity.displayName+' ';button.textContent='Sign out';button.onclick=async()=>{await auth.logout();location.assign('/');};}
+ if(context.authenticated){user.textContent=context.identity.displayName+' ';button.textContent='Sign out';button.onclick=async()=>{if(!(await auth.logout()).redirecting)location.assign('/');};}
  else{user.textContent='';button.textContent='Sign in';button.onclick=()=>auth.login(location.pathname);}
  button.setAttribute('data-testid','auth-button');user.appendChild(button);
 }

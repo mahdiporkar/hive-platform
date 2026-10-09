@@ -35,7 +35,7 @@ public class IdentityConfiguration {
   var registration=ClientRegistrations.fromIssuerLocation(issuer).registrationId("primary").clientId(client).clientSecret(secret).scope("openid","profile").redirectUri("{baseUrl}/login/oauth2/code/{registrationId}").clientSettings(ClientRegistration.ClientSettings.builder().requireProofKey(true).build()).build();
   return new DynamicRegistrations(registration,control,origins,local);
  }
- @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations,IdentityControlClient control) throws Exception {
+ @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations,IdentityControlClient control,ObjectMapper json) throws Exception {
   var clients=new RequestAuthorizedClients();var contexts=new HttpSessionSecurityContextRepository();
   // One chain for all browser paths when identity is enabled; route-level decisions belong to the runtime proxy.
   return http.securityMatcher("/auth/**","/oauth2/**","/login/oauth2/**","/api/**")
@@ -55,7 +55,7 @@ public class IdentityConfiguration {
       if(!registration.getProviderDetails().getIssuerUri().equals(oidc.getIssuer().toString()))throw new IllegalStateException("Issuer mismatch");
       var canonical=control.sync(registration.getRegistrationId(),oidc.getIssuer().toString(),oidc.getSubject(),oidc.getFullName()==null?oidc.getSubject():oidc.getFullName());
       var session=request.getSession();Object old=session.getAttribute(VAULT_HANDLE);if(old instanceof String handle)vault.delete(handle);
-      String handle=vault.store(new VaultRecord(registration.getRegistrationId(),client.getAccessToken().getTokenValue(),client.getRefreshToken()==null?null:client.getRefreshToken().getTokenValue(),client.getAccessToken().getExpiresAt(),Instant.now().plusSeconds(1800)));
+      String handle=vault.store(new VaultRecord(registration.getRegistrationId(),client.getAccessToken().getTokenValue(),client.getRefreshToken()==null?null:client.getRefreshToken().getTokenValue(),client.getAccessToken().getExpiresAt(),Instant.now().plusSeconds(1800),oidc.getIdToken().getTokenValue()));
       session.setAttribute(VAULT_HANDLE,handle);session.setMaxInactiveInterval(1800);
       var identity=new SessionIdentity(canonical.id(),canonical.tenantId(),canonical.issuer(),canonical.subject(),canonical.displayName());
       var safe=SecurityContextHolder.createEmptyContext();safe.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(identity,null,List.of()));
@@ -65,7 +65,8 @@ public class IdentityConfiguration {
       response.sendRedirect(ReturnUrl.validate(destination instanceof String path?path:"/"));
      }catch(RuntimeException failure){SecurityContextHolder.clearContext();var session=request.getSession(false);if(session!=null){Object handle=session.getAttribute(VAULT_HANDLE);if(handle instanceof String value)vault.delete(value);session.invalidate();}response.sendError(HttpServletResponse.SC_UNAUTHORIZED);}
     }))
-   .logout(logout->logout.logoutUrl("/auth/logout").addLogoutHandler((request,response,authentication)->{var session=request.getSession(false);if(session!=null&&session.getAttribute(VAULT_HANDLE)instanceof String handle)vault.delete(handle);}).logoutSuccessHandler((request,response,authentication)->response.setStatus(204)).deleteCookies("HIVE_SESSION"))
+   // Full sign-out: local session and tokens, then the identity provider's session (OidcLogout).
+   .logout(logout->logout.logoutUrl("/auth/logout").addLogoutHandler(OidcLogout.endVaultRecord(vault)).logoutSuccessHandler(OidcLogout.providerLogout(registrations,json)).deleteCookies("HIVE_SESSION"))
    .build();
  }
 }

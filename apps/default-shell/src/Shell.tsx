@@ -101,7 +101,8 @@ function Workspace({engine, context, registry}: {engine: WorkspaceEngine; contex
         <ExtensionSlot registry={registry} point="HEADER" />
         {context.authenticated
           ? <span><ExtensionSlot registry={registry} point="PROFILE" /><span data-testid="user">{context.identity.displayName}</span> <button data-testid="sign-out" onClick={async () => {
-              await auth.logout();
+              // A provider logout navigates away; updating the context now would start a new sign-in instead.
+              if ((await auth.logout()).redirecting) return;
               const next = await auth.currentContext();
               window.dispatchEvent(new CustomEvent('hive:context', {detail: next}));
             }}>Sign out</button></span>

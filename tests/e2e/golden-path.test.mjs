@@ -22,7 +22,7 @@ test('golden path: clean install → administration → login → runtime → ev
  const realmDir=resolve('.local/golden/realm');mkdirSync(realmDir,{recursive:true});
  writeFileSync(`${realmDir}/realm.json`,JSON.stringify({realm,enabled:true,sslRequired:'none',
   clients:[{clientId:'hive-bff',enabled:true,publicClient:false,secret:'golden-client-secret-0001',standardFlowEnabled:true,directAccessGrantsEnabled:false,
-   redirectUris:[`${origin}/login/oauth2/code/primary`],attributes:{'pkce.code.challenge.method':'S256'}}],
+   redirectUris:[`${origin}/login/oauth2/code/primary`],attributes:{'pkce.code.challenge.method':'S256','post.logout.redirect.uris':`${origin}/*`}}],
   users:[['operator',operatorId,'Olivia','Operator'],['learner',learnerId,'Lee','Learner']].map(([username,id,firstName,lastName])=>({id,username,enabled:true,email:`${username}@example.test`,
    emailVerified:true,firstName,lastName,credentials:[{type:'password',value:'golden-password',temporary:false}],requiredActions:[]}))}));
  const container=`hive-golden-keycloak-${Date.now()}`;
@@ -140,11 +140,19 @@ test('golden path: clean install → administration → login → runtime → ev
  assert.equal(await page.getAttribute('[data-hive-workspace]','data-layout'),'SPLIT');
  // 30. Logout. 31. The session is invalidated (also for a replayed cookie).
  const session=(await context.cookies()).find(c=>c.name==='HIVE_SESSION');
+ // Full sign-out: Hive's session, then Keycloak's own (RP-initiated logout), which returns to this deployment's root.
+ const providerLogout=page.waitForRequest(r=>r.url().startsWith(`${issuer}/protocol/openid-connect/logout?`));
  await page.click('[data-testid=sign-out]');
+ assert.match((await providerLogout).url(),/id_token_hint=/);
+ await page.waitForURL(u=>u.href===origin+'/',{timeout:30000});
+ await page.waitForFunction(()=>window.hiveShell?.engine?.workspace);
  await waitFor(s=>s.every(x=>x.status==='LOGIN_REQUIRED'),'protected slots require login');
  assert.equal(await page.evaluate(async()=>(await fetch('/api/me/context')).status),401);
  const replay=await fetch(`${stack.urls.bff}/api/me/context`,{headers:{Cookie:`HIVE_SESSION=${session.value}`}});
  assert.equal(replay.status,401,'old session cookie no longer works');
  assert.equal(stack.redis('KEYS','hive:vault:*').split('\n').filter(Boolean).length,1,'only the operator session holds a vault record');
+ // Keycloak's session has ended too: signing in again asks for credentials.
+ await page.goto(origin+'/auth/login');
+ await page.waitForSelector('#username',{timeout:30000});
  assert.deepEqual(pageErrors,[]);
 });

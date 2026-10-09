@@ -31,7 +31,7 @@ async function start():Promise<void> {
 
  const user=document.getElementById('user')!;const button=document.createElement('button');button.setAttribute('data-testid','auth-button');
  if(context.authenticated){user.textContent=`${context.identity.displayName} `;button.textContent='Sign out';
-  button.onclick=async()=>{await auth.logout();await engine.setContext(await auth.currentContext());user.textContent='';button.textContent='Signed out';};}
+  button.onclick=async()=>{if((await auth.logout()).redirecting)return;await engine.setContext(await auth.currentContext());user.textContent='';button.textContent='Signed out';};}
  else{button.textContent='Sign in';button.onclick=()=>auth.login(location.pathname);}
  user.appendChild(button);
 

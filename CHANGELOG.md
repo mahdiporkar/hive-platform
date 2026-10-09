@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Sign-out also ends the identity provider's session (OIDC RP-initiated logout with `id_token_hint`): `POST /auth/logout` answers `200 {"logoutUrl"}` for a provider session (`204` otherwise) and `@hive-platform/auth` `logout()` navigates there, returning `{redirecting}`. Previously only the Hive session ended, so a shell that signs in automatically re-authenticated the same person silently through the provider's still-valid SSO session.
+
 ## 0.1.0-dev.0 — unreleased
 
 - Independent repository and clean bootstrap with verified PostgreSQL/Flyway and durable OpenFGA model storage.

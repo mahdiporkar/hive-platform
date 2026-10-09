@@ -60,7 +60,11 @@ export function App() {
             <LanguagePicker />
             {[...roles].map(r => <Tag key={r} color="purple" data-testid={`role-${r}`}>{t(r)}</Tag>)}
             <Typography.Text style={{color: '#fff'}} data-testid="operator-name">{context.identity.displayName}</Typography.Text>
-            <Button size="small" data-testid="logout" onClick={async () => { await http.post('/auth/logout'); window.location.assign('/'); }}>{t("Sign out")}</Button>
+            <Button size="small" data-testid="logout" onClick={async () => {
+              // Ends the Hive session, then the identity provider's (it returns to this deployment's root).
+              const result = await http.post<{logoutUrl?: string} | undefined>('/auth/logout');
+              window.location.assign(result?.logoutUrl && /^https?:\/\//i.test(result.logoutUrl) ? result.logoutUrl : '/');
+            }}>{t("Sign out")}</Button>
           </Space>
         </Layout.Header>
         <Layout>
