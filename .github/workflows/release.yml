@@ -1,0 +1,28 @@
+name: Request coordinated CapRover release
+on:
+  push:
+    branches: [main, platform-v1]
+    paths-ignore: ['docs/**', '**/*.md', 'LICENSE']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  notify:
+    if: github.ref_name == (vars.HIVE_RELEASE_BRANCH || 'platform-v1')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Mint scoped cross-repository token
+        id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: mahdiporkar
+          repositories: university-erp
+      - name: Request exact Hive revision (no reverse trigger)
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          HIVE_SHA: ${{ github.sha }}
+        run: |
+          jq -n --arg sha "$HIVE_SHA" '{event_type:"hive-release",client_payload:{repository:"mahdiporkar/hive-platform",sha:$sha}}' > request.json
+          gh api repos/mahdiporkar/university-erp/dispatches --input request.json
