@@ -26,6 +26,7 @@ import org.springframework.security.web.savedrequest.NullRequestCache;
 @ConditionalOnProperty(name="hive.identity.enabled",havingValue="true")
 public class IdentityConfiguration {
  public static final String VAULT_HANDLE="HIVE_VAULT_HANDLE",RETURN_URL="HIVE_RETURN_URL";
+ private static final org.slf4j.Logger LOG=org.slf4j.LoggerFactory.getLogger(IdentityConfiguration.class);
  @Bean TokenVault tokenVault(StringRedisTemplate redis,ObjectMapper json,@Value("${hive.vault.key-id}")String id,@Value("${hive.vault.key}")String key,@Value("${hive.vault.previous-keys:}")String previous){return new TokenVault(redis,json,new TokenVaultCrypto(id,key,previous));}
  @Bean TokenRefresh tokenRefresh(TokenVault vault,StringRedisTemplate redis,ClientRegistrationRepository providers,ObjectMapper json){return new TokenRefresh(vault,redis,providers,json);}
  @Bean IdentityControlClient identityControl(@Value("${hive.identity.control-url}")String url,@Value("${hive.identity.control-password}")String password,@Value("${hive.identity.allow-local-http:false}")boolean local,ObjectMapper json){return new IdentityControlClient(url,password,local,json);}
@@ -35,7 +36,7 @@ public class IdentityConfiguration {
   var registration=ClientRegistrations.fromIssuerLocation(issuer).registrationId("primary").clientId(client).clientSecret(secret).scope("openid","profile").redirectUri("{baseUrl}/login/oauth2/code/{registrationId}").clientSettings(ClientRegistration.ClientSettings.builder().requireProofKey(true).build()).build();
   return new DynamicRegistrations(registration,control,origins,local);
  }
- @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,ClientRegistrationRepository registrations,IdentityControlClient control) throws Exception {
+ @Bean @Order(1) SecurityFilterChain identitySecurity(HttpSecurity http,TokenVault vault,TokenRefresh refresh,ClientRegistrationRepository registrations,IdentityControlClient control) throws Exception {
   var clients=new RequestAuthorizedClients();var contexts=new HttpSessionSecurityContextRepository();
   // One chain for all browser paths when identity is enabled; route-level decisions belong to the runtime proxy.
   return http.securityMatcher("/auth/**","/oauth2/**","/login/oauth2/**","/api/**")
@@ -65,7 +66,10 @@ public class IdentityConfiguration {
       response.sendRedirect(ReturnUrl.validate(destination instanceof String path?path:"/"));
      }catch(RuntimeException failure){SecurityContextHolder.clearContext();var session=request.getSession(false);if(session!=null){Object handle=session.getAttribute(VAULT_HANDLE);if(handle instanceof String value)vault.delete(value);session.invalidate();}response.sendError(HttpServletResponse.SC_UNAUTHORIZED);}
     }))
-   .logout(logout->logout.logoutUrl("/auth/logout").addLogoutHandler((request,response,authentication)->{var session=request.getSession(false);if(session!=null&&session.getAttribute(VAULT_HANDLE)instanceof String handle)vault.delete(handle);}).logoutSuccessHandler((request,response,authentication)->response.setStatus(204)).deleteCookies("HIVE_SESSION"))
+   // Sign-out ends the provider SSO session too; otherwise the next login is silently re-authenticated by the provider.
+   .logout(logout->logout.logoutUrl("/auth/logout").addLogoutHandler((request,response,authentication)->{var session=request.getSession(false);if(session!=null&&session.getAttribute(VAULT_HANDLE)instanceof String handle){
+     try{if(!refresh.endProviderSession(vault.read(handle)))LOG.warn("Identity provider session could not be ended at sign-out");}catch(IllegalStateException unavailable){/* vault record already expired */}
+     vault.delete(handle);}}).logoutSuccessHandler((request,response,authentication)->response.setStatus(204)).deleteCookies("HIVE_SESSION"))
    .build();
  }
 }
