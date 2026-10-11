@@ -12,7 +12,11 @@ public final class IdentityControlClient {
  public record Canonical(String id,String tenantId,String displayName,String issuer,String subject){}
  private final URI base;private final String authorization;private final ObjectMapper json;
  private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
- public IdentityControlClient(String url,String password,boolean local,ObjectMapper json){this.base=URI.create(url);if(base.getHost()==null||base.getUserInfo()!=null||base.getQuery()!=null||base.getFragment()!=null||!("https".equals(base.getScheme())||local&&"http".equals(base.getScheme())&&Set.of("localhost","127.0.0.1").contains(base.getHost())))throw new IllegalArgumentException("Identity control endpoint requires HTTPS");if(password.length()<32)throw new IllegalArgumentException("Identity control credential is required");this.authorization="Basic "+Base64.getEncoder().encodeToString(("bff:"+password).getBytes(StandardCharsets.UTF_8));this.json=json;}
+ /**
+  * HTTPS by default. {@code controlHttp} (HIVE_CONTROL_ALLOW_HTTP, the same switch as the control-plane channel) admits plain
+  * HTTP only to an internal authorization service; {@code local} keeps the development loopback exception.
+  */
+ public IdentityControlClient(String url,String password,boolean local,boolean controlHttp,ObjectMapper json){this.base=URI.create(url);if(base.getHost()==null||base.getUserInfo()!=null||base.getQuery()!=null||base.getFragment()!=null||!("https".equals(base.getScheme())||controlHttp&&"http".equals(base.getScheme())&&internalHost(base.getHost())||local&&"http".equals(base.getScheme())&&Set.of("localhost","127.0.0.1").contains(base.getHost())))throw new IllegalArgumentException("Identity control endpoint requires HTTPS");if(password.length()<32)throw new IllegalArgumentException("Identity control credential is required");this.authorization="Basic "+Base64.getEncoder().encodeToString(("bff:"+password).getBytes(StandardCharsets.UTF_8));this.json=json;}
  public Provider provider(String code){if(!code.matches("[a-z][a-z0-9-]{2,79}"))throw new IllegalArgumentException("Invalid provider code");return call("/internal/identity/providers/"+code,null,Provider.class);}
  public Provider route(String code,String tenant,String domain){var query=new ArrayList<String>();if(code!=null)query.add("code="+encode(code));if(tenant!=null)query.add("tenant="+encode(tenant));if(domain!=null)query.add("domain="+encode(domain));return call("/internal/identity/route?"+String.join("&",query),null,Provider.class);}
  public Canonical sync(String provider,String issuer,String subject,String name){return call("/internal/identity/login",Map.of("providerCode",provider,"issuer",issuer,"subject",subject,"displayName",name),Canonical.class);}
@@ -25,5 +29,16 @@ public final class IdentityControlClient {
   if(response.statusCode()!=200)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Identity control request rejected");
   return json.readValue(response.body(),type);
  }catch(java.io.IOException failed){throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Identity control unavailable");}catch(InterruptedException interrupted){Thread.currentThread().interrupt();throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Identity control interrupted");}}
+ /** A single-label service name on the private overlay (e.g. srv-captain--hive-authorization) or a loopback/private IPv4 literal; never a public name or address. */
+ static boolean internalHost(String host){
+  String h=host.toLowerCase(Locale.ROOT);
+  // Single DNS label with a letter, not a hexadecimal address form such as 0x0a000001.
+  if(h.matches("[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")&&h.matches(".*[a-z].*")&&!h.matches("0x[0-9a-f]+"))return true;
+  // Dotted-quad literal parsed without DNS: loopback 127/8 or private 10/8, 172.16/12, 192.168/16.
+  if(!h.matches("\\d{1,3}(?:\\.\\d{1,3}){3}"))return false;
+  int[] o=Arrays.stream(h.split("\\.")).mapToInt(Integer::parseInt).toArray();
+  if(Arrays.stream(o).anyMatch(v->v>255))return false;
+  return o[0]==127||o[0]==10||o[0]==172&&o[1]>=16&&o[1]<=31||o[0]==192&&o[1]==168;
+ }
  private static String encode(String value){return URLEncoder.encode(value,StandardCharsets.UTF_8);}
 }
