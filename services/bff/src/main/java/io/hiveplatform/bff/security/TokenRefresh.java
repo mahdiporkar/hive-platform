@@ -43,5 +43,23 @@ public final class TokenRefresh {
   }catch(InterruptedException interrupted){Thread.currentThread().interrupt();throw new IllegalStateException("Refresh interrupted");}
    catch(java.io.IOException failed){throw new IllegalStateException("Refresh unavailable");}
  }
+ /**
+  * Ends the identity provider session behind a vault record (back-channel, client-authenticated, refresh-token based) so a
+  * signed-out browser is not silently signed in again by the provider's SSO cookie. Returns false when it could not be confirmed.
+  */
+ public boolean endProviderSession(VaultRecord record){
+  if(record.refreshToken()==null||record.refreshToken().isBlank())return false;
+  var provider=providers.findByRegistrationId(record.providerId());if(provider==null)return false;
+  Object endpoint=provider.getProviderDetails().getConfigurationMetadata().get("end_session_endpoint");
+  if(!(endpoint instanceof String uri)||uri.isBlank())return false;
+  var target=URI.create(uri);var issuer=URI.create(provider.getProviderDetails().getIssuerUri());
+  // The endpoint comes from the issuer's discovery document; only send the client secret back to that same origin.
+  if(!Objects.equals(target.getScheme(),issuer.getScheme())||!Objects.equals(target.getAuthority(),issuer.getAuthority()))return false;
+  String basic=Base64.getEncoder().encodeToString((encode(provider.getClientId())+":"+encode(provider.getClientSecret())).getBytes(StandardCharsets.UTF_8));
+  var request=HttpRequest.newBuilder(target).timeout(Duration.ofSeconds(5)).header("Authorization","Basic "+basic).header("Content-Type","application/x-www-form-urlencoded").POST(HttpRequest.BodyPublishers.ofString("refresh_token="+encode(record.refreshToken()))).build();
+  try {var response=http.send(request,HttpResponse.BodyHandlers.discarding());return response.statusCode()/100==2;}
+  catch(InterruptedException interrupted){Thread.currentThread().interrupt();return false;}
+  catch(java.io.IOException|IllegalArgumentException failed){return false;}
+ }
  private static String encode(String value){return URLEncoder.encode(value,StandardCharsets.UTF_8);}
 }
