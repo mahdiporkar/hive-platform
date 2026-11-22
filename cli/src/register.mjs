@@ -19,7 +19,14 @@ export async function register(dir,{authorization,password,log=()=>{}}) {
  step(`application ${solution.applicationKey}`,await call('POST','/admin/applications',{key:solution.applicationKey,displayName:solution.displayName},{allow:[409]}));
  for(const key of solution.modules){
   const dist=join(dir,'dist/modules',key);
-  step(`module ${key}`,await call('POST','/admin/modules',{applicationKey:solution.applicationKey,moduleKey:key,displayName:key,definitionMode:'MANIFEST'},{allow:[409]}));
+  const definitionMode=solution.moduleDefinitionModes?.[key]??'MANIFEST';
+  if(!['MANIFEST','HYBRID'].includes(definitionMode))throw new Error(`Invalid definition mode for ${key}`);
+  step(`module ${key}`,await call('POST','/admin/modules',{applicationKey:solution.applicationKey,moduleKey:key,displayName:key,definitionMode},{allow:[409]}));
+  if(definitionMode==='HYBRID'){
+   const current=(await call('GET',`/admin/modules/${key}`)).value;
+   if(current.applicationKey!==solution.applicationKey)throw new Error(`Module ${key} belongs to another application`);
+   if(current.definitionMode!=='HYBRID')step(`hybrid ${key}`,await call('PUT',`/admin/modules/${key}`,{...current,definitionMode:'HYBRID'}));
+  }
   const resources=JSON.parse(readFileSync(join(dist,'resource-manifest.json'),'utf8'));
   step(`resource manifest ${key}@${resources.manifestVersion}`,await call('POST',`/admin/modules/${key}/resource-manifests`,resources));
   const revision=(await call('GET',`/admin/modules/${key}/resource-manifests/${resources.manifestVersion}`)).value;
@@ -30,7 +37,17 @@ export async function register(dir,{authorization,password,log=()=>{}}) {
  }
  for(const key of solution.services){
   const service=JSON.parse(readFileSync(join(dir,'services',`${key}.json`),'utf8'));
+  const targetOverride=process.env[`HIVE_TARGET_${key.toUpperCase().replaceAll('-','_')}_URL`];
+  if(targetOverride){
+   const url=new URL(targetOverride);
+   if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw new Error('Service target override requires a clean HTTPS URL');
+   service.target.baseUrl=targetOverride;
+  }
   step(`service target ${service.target.key}`,await call('POST','/admin/service-targets',service.target,{allow:[409]}));
+  if(targetOverride){
+   const current=(await call('GET',`/admin/service-targets/${service.target.key}`)).value;
+   if(current.baseUrl!==targetOverride)step(`service target URL ${service.target.key}`,await call('PUT',`/admin/service-targets/${service.target.key}`,{...current,baseUrl:targetOverride}));
+  }
   step(`route ${service.route.key}`,await call('POST','/admin/proxy-routes',service.route,{allow:[409]}));
   for(const operation of service.operations)step(`operation ${service.route.key}.${operation.key}`,await call('POST',`/admin/proxy-routes/${service.route.key}/operations`,operation,{allow:[409]}));
  }
